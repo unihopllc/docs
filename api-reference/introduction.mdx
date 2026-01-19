@@ -1,33 +1,52 @@
 ---
 title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+description: 'UniHop API for managing deliveries and accessing delivery service providers'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Welcome to the UniHop API
 
-## Welcome
+The UniHop API enables you to integrate on-demand delivery services into your application. With our API, you can create and manage delivery orders, track their status, and discover available delivery service providers.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## Key Features
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+- **Order Management** - Create, retrieve, and cancel delivery orders
+- **Service Discovery** - Get a list of available third-party delivery providers
+- **Real-time Tracking** - Monitor order status, driver location, and estimated delivery times
+- **Flexible Delivery Options** - Support for scheduled and on-demand deliveries
+- **Custom Integration** - Flexible payload support for partner-specific data
 
-## Authentication
+## Getting Started
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+### Base URL
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+All API requests are made to:
 ```
+https://api.unihop.app/v1
+```
+
+### Authentication
+
+All API endpoints require authentication using a JWT token. Include your token in the `Authorization` header of each request:
+
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+```
+
+For details on obtaining and using JWT tokens, see the [Authentication](/auth) documentation.
+
+## Core Endpoints
+
+- **[Create Order](/api-reference/endpoint/create-order)** - Create a new delivery order
+- **[Get Order](/api-reference/endpoint/get)** - Retrieve order details
+- **[Get Partner Order](/api-reference/endpoint/get-partner-order)** - Retrieve order by partner reference
+- **[Cancel Order](/api-reference/endpoint/delete)** - Cancel a delivery order
+- **[Availability](/api-reference/endpoint/availability)** - List available delivery service providers
+
+## Response Format
+
+All API responses are returned in JSON format. Successful responses include relevant data, while error responses include error codes and descriptive messages.
+
+## Need Help?
+
+For questions or issues, refer to our [development guide](/development) or check out the [quickstart](/quickstart) for common use cases.
+

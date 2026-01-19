@@ -22,7 +22,7 @@ Our navigation syntax is recursive which means you can make nested navigation gr
       "groups": [
         {
           "group": "Getting Started",
-          "pages": ["quickstart"]
+          "pages": ["quickstart", "auth", "webhooks"]
         }
       ]
     }
@@ -39,7 +39,7 @@ Our navigation syntax is recursive which means you can make nested navigation gr
         {
           "group": "Getting Started",
           "pages": [
-            "quickstart",
+            "quickstart","auth","webhooks",
             {
               "group": "Nested Reference Pages",
               "pages": ["nested-reference-page"]
@@ -82,6 +82,6 @@ You cannot use `api` for the name of a folder unless you nest it inside another 
 }
 ```
 
-## Hidden pages
+## Hidden Pages
 
 MDX files not included in `docs.json` will not show up in the sidebar but are accessible through the search bar and by linking directly to them.

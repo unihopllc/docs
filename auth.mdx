@@ -1,0 +1,380 @@
+# Authentication Guide (RS256)
+
+To authenticate with our API, you'll need to generate a **public/private RSA key pair**. We use **RS256** (RSA Signature with SHA-256) to sign and verify requests securely.
+
+This guide will help you:
+
+1. ✅ Generate your keys
+2. 🛠 Use them to sign JWTs
+3. 🔑 Share your public key with us
+4. 🔄 Decode webhook JWTs from us
+
+---
+
+## 1. ✅ Generate RSA Key Pair
+
+Run the following command in your terminal to generate a 2048-bit RSA key pair:
+
+```bash
+openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048
+```
+
+This creates your private key file: **private_key.pem.**
+
+Now generate the public key:
+
+```bash
+openssl rsa -pubout -in private_key.pem -out public_key.pem
+``` 
+
+You should now have:
+
+**private_key.pem** (keep this safe and secret)
+
+**public_key.pem** (you'll send this to us)
+
+## 2. 🛠 Encode your JWTs
+
+JSON Web Tokens (JWTs) are a compact, URL-safe means of representing claims securely between two parties. When using RS256, you'll sign the JWT with your private key, and we'll verify it with your public key.
+
+### JWT Structure
+
+A JWT consists of three parts separated by dots (`.`):
+- **Header**: Contains the token type and signing algorithm
+- **Payload**: Contains the claims (data)
+- **Signature**: Verifies the token hasn't been altered
+
+For our API, your JWT **must** include the following claims in the payload:
+
+| Claim | Description | Example |
+|-------|-------------|---------|
+| `iss` | Issuer - Your partner_uid (provided by us) | `"iss": "your_partner_uid"` |
+| `iat` | Issued At - Current timestamp (seconds since epoch) | `"iat": 1686104400` |
+| `exp` | Expiration Time - Must be within 30 minutes of `iat` | `"exp": 1686106200` |
+
+### Code Examples
+
+#### PHP
+
+Using the [firebase/php-jwt](https://github.com/firebase/php-jwt) library:
+
+```php
+use Firebase\JWT\JWT;
+
+// Load your private key
+$privateKey = file_get_contents('private_key.pem');
+
+// Create payload with required claims
+$payload = [
+    'iss' => 'your_partner_uid', // Replace with your partner_uid
+    'iat' => time(),
+    'exp' => time() + 1800, // 30 minutes
+    // Add any additional claims you need
+];
+
+// Sign the JWT with RS256 algorithm
+$jwt = JWT::encode($payload, $privateKey, 'RS256');
+
+// Use this token in your Authorization header
+echo "Bearer " . $jwt;
+```
+
+#### Node.js
+
+Using the [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) library:
+
+```javascript
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+
+// Load your private key
+const privateKey = fs.readFileSync('private_key.pem');
+
+// Create payload with required claims
+const payload = {
+    iss: 'your_partner_uid', // Replace with your partner_uid
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 1800 // 30 minutes
+    // Add any additional claims you need
+};
+
+// Sign the JWT with RS256 algorithm
+const token = jwt.sign(payload, privateKey, { algorithm: 'RS256' });
+
+// Use this token in your Authorization header
+console.log('Bearer ' + token);
+```
+
+#### Python
+
+Using the [PyJWT](https://github.com/jpadilla/pyjwt) library:
+
+```python
+import jwt
+import time
+
+# Load your private key
+with open('private_key.pem', 'rb') as key_file:
+    private_key = key_file.read()
+
+# Create payload with required claims
+payload = {
+    'iss': 'your_partner_uid',  # Replace with your partner_uid
+    'iat': int(time.time()),
+    'exp': int(time.time()) + 1800  # 30 minutes
+    # Add any additional claims you need
+}
+
+# Sign the JWT with RS256 algorithm
+token = jwt.encode(payload, private_key, algorithm='RS256')
+
+# Use this token in your Authorization header
+print(f"Bearer {token}")
+```
+
+### Important Notes
+
+1. **Token Expiration**: Your token must expire within 30 minutes of creation. The server will reject tokens with longer expiration times.
+
+2. **Token Format**: Always include the token in your Authorization header with the "Bearer" prefix:
+   ```
+   Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+   ```
+
+3. **Security**: Keep your private key secure. Never share it or commit it to version control.
+
+4. **Validation**: The server validates:
+   - The token signature using your public key
+   - The presence of required claims (`iss`, `iat`, `exp`)
+   - That the token hasn't expired
+   - That the expiration is within 30 minutes of issuance
+
+## 3. 🔑 Share Your Public Key
+
+After generating your key pair, you need to share your public key with us. This allows us to verify the JWTs you sign.
+
+1. Contact your account manager or support team
+2. Send them your `public_key.pem` file
+3. We'll associate it with your partner account
+
+Once your public key is registered in our system, you can start using JWT authentication for your API requests.
+
+## 4. 🔄 Decoding Webhook JWTs
+
+When you receive webhooks from our service, the payload is secured with a JWT signed using our private key. To verify and decode these JWTs, you'll need to use our public key.
+
+### Webhook JWT Structure
+
+Webhooks sent from our service include a JWT in the `Authorization` header with the following structure:
+
+- **Header**: Contains `alg: "RS256"` and `typ: "JWT"`
+- **Payload**: Contains:
+  - `iss`: Always set to `"unihop"` (our issuer identifier)
+  - `exp`: Expiration timestamp (30 minutes from creation)
+  - `payload`: The actual webhook data
+
+### Verification Process
+
+When receiving a webhook, you should:
+
+1. Extract the JWT from the `Authorization` header
+2. Verify the JWT signature using our public key
+3. Check that the `iss` claim is `"unihop"`
+4. Ensure the token hasn't expired
+5. Extract and process the webhook data from the `payload` field
+
+### Code Examples
+
+#### PHP
+
+Using the [firebase/php-jwt](https://github.com/firebase/php-jwt) library:
+
+```php
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+function handleWebhook($request) {
+    // Extract JWT from Authorization header
+    $authHeader = $request->header('Authorization');
+    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+        return response()->json(['error' => 'Unauthorized - Token missing'], 401);
+    }
+    
+    $token = trim(str_replace('Bearer ', '', $authHeader));
+    
+    try {
+        // Load our public key
+        $publicKey = file_get_contents('unihop_public_key.pem');
+        
+        // Decode and verify the JWT
+        $decoded = JWT::decode($token, new Key($publicKey, 'RS256'));
+        
+        // Verify issuer
+        if (!isset($decoded->iss) || $decoded->iss !== 'unihop') {
+            throw new Exception("Invalid issuer");
+        }
+        
+        // Extract the webhook payload
+        if (!isset($decoded->payload)) {
+            throw new Exception("Payload missing");
+        }
+        
+        $webhookData = $decoded->payload;
+        
+        // Process the webhook data
+        processWebhookData($webhookData);
+        
+        return response()->json(['status' => 'success'], 200);
+        
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Invalid token: ' . $e->getMessage()], 401);
+    }
+}
+```
+
+#### Node.js
+
+Using the [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) library:
+
+```javascript
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+
+function handleWebhook(req, res) {
+    // Extract JWT from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized - Token missing' });
+    }
+    
+    const token = authHeader.replace('Bearer ', '').trim();
+    
+    try {
+        // Load our public key
+        const publicKey = fs.readFileSync('unihop_public_key.pem');
+        
+        // Verify and decode the JWT
+        const decoded = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
+        
+        // Verify issuer
+        if (!decoded.iss || decoded.iss !== 'unihop') {
+            throw new Error('Invalid issuer');
+        }
+        
+        // Extract the webhook payload
+        if (!decoded.payload) {
+            throw new Error('Payload missing');
+        }
+        
+        const webhookData = decoded.payload;
+        
+        // Process the webhook data
+        processWebhookData(webhookData);
+        
+        return res.status(200).json({ status: 'success' });
+        
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token: ' + error.message });
+    }
+}
+```
+
+#### Python
+
+Using the [PyJWT](https://github.com/jpadilla/pyjwt) library:
+
+```python
+import jwt
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/webhook', methods=['POST'])
+def handle_webhook():
+    # Extract JWT from Authorization header
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Unauthorized - Token missing'}), 401
+    
+    token = auth_header.replace('Bearer ', '').strip()
+    
+    try:
+        # Load our public key
+        with open('unihop_public_key.pem', 'rb') as key_file:
+            public_key = key_file.read()
+        
+        # Verify and decode the JWT
+        decoded = jwt.decode(
+            token,
+            public_key,
+            algorithms=['RS256'],
+            options={'verify_signature': True}
+        )
+        
+        # Verify issuer
+        if 'iss' not in decoded or decoded['iss'] != 'unihop':
+            raise ValueError('Invalid issuer')
+        
+        # Extract the webhook payload
+        if 'payload' not in decoded:
+            raise ValueError('Payload missing')
+        
+        webhook_data = decoded['payload']
+        
+        # Process the webhook data
+        process_webhook_data(webhook_data)
+        
+        return jsonify({'status': 'success'}), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Invalid token: {str(e)}'}), 401
+
+def process_webhook_data(data):
+    # Implement your webhook processing logic here
+    pass
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+### Important Security Considerations
+
+1. **Always Verify the Signature**: Never process webhook data without first verifying the JWT signature with our public key.
+
+2. **Check the Issuer**: Confirm that the `iss` claim is `"unihop"` to ensure the webhook came from our service.
+
+3. **Validate Expiration**: Reject tokens that have expired to prevent replay attacks.
+
+4. **Implement Idempotency**: Webhooks may be sent multiple times in rare cases. Implement idempotency checks to avoid processing the same webhook twice.
+
+5. **Use HTTPS**: Always use HTTPS for your webhook endpoint to ensure the data remains encrypted in transit.
+
+### Obtaining Our Public Key
+
+To verify webhooks from our service, you'll need our public key. Contact your account manager or support team to obtain the public key file (`unihop_public_key.pem`).
+
+### Testing Webhook Verification
+
+You can test your webhook verification implementation using our webhook testing tool in the developer dashboard. This allows you to send test webhooks to your endpoint and verify that your verification logic works correctly.
+
+## Testing Your JWT
+
+You can use online tools like [jwt.io](https://jwt.io/) to verify your JWT is correctly formatted:
+
+1. Paste your JWT in the "Encoded" field
+2. Paste your public key in the "Verify Signature" section
+3. Confirm the signature is verified and the payload contains the correct claims
+
+## Troubleshooting
+
+If you're experiencing authentication issues, check:
+
+- Your JWT includes all required claims (`iss`, `iat`, `exp`)
+- The `iss` claim matches your partner_uid
+- The token hasn't expired
+- The expiration time is within 30 minutes of the issued time
+- You're using the correct private key to sign the token
+- We have your correct public key on file
+- The Authorization header format is correct (`Bearer <token>`)
+
+For further assistance, contact our support team.

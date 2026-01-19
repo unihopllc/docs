@@ -1,0 +1,205 @@
+# Webhook System Documentation
+
+This document provides comprehensive documentation for our webhook system, detailing the event types, request body structure, and authentication mechanisms.
+
+
+
+
+## Event Types
+
+Our webhook system dispatches requests based on specific event names, categorized primarily into `delivery` and `location` events. Each event signifies a distinct state change or action within our system.
+
+### Delivery Events
+
+Delivery events provide updates on the lifecycle of a delivery, from assignment to completion or failure. The following is a comprehensive list of delivery event types:
+
+- `delivery.assigned`: A delivery has been assigned.
+- `delivery.pickup_enroute`: The delivery driver is enroute to the pickup location.
+- `delivery.pickup_arrived`: The delivery driver has arrived at the pickup location.
+- `delivery.pickup_complete`: The delivery driver has completed the pickup.
+- `delivery.dropoff_enroute`: The delivery driver is enroute to the dropoff location.
+- `delivery.dropoff_arrived`: The delivery driver has arrived at the dropoff location.
+- `delivery.dropoff_complete`: The delivery driver has completed the dropoff.
+- `delivery.return_in_progress`: The delivery is in the process of being returned.
+- `delivery.returned`: The delivery has been successfully returned.
+- `delivery.canceled`: The delivery has been canceled.
+- `delivery.failed`: The delivery has failed.
+
+### Location Events
+
+Location events provide updates on the geographical status of a delivery or driver. The following is a comprehensive list of location event types:
+
+- `location.pickup_enroute`: The driver is enroute to the pickup location.
+- `location.assigned_driver`: A driver has been assigned to the delivery.
+- `location.pickup_complete`: The driver has completed the pickup and is now enroute to the dropoff.
+- `location.dropoff_enroute`: The driver is enroute to the dropoff location.
+- `location.return_in_progress`: The driver is in the process of returning to the origin.
+
+
+
+
+## Request Body Structure
+
+All webhook requests are sent as `POST` requests with a JSON payload. The structure of the request body is consistent across all event types and contains detailed information pertinent to the event. Below is a breakdown of the fields included in the request body:
+
+```json
+{
+  "event_name": "string",
+  "status": "string",
+  "price": {
+    "value": "number",
+    "currency": "string"
+  },
+  "currency": "string",
+  "distance": {
+    "value": "number",
+    "unit": "string"
+  },
+  "pickup_name": "string",
+  "dropoff_name": "string",
+  "delivery_date": "string",
+  "delivery_start_time": "string",
+  "partner_payload": "object",
+  "driver_id": "number",
+  "driver_name": "string",
+  "driver_location": {
+    "lat": "number",
+    "lng": "number"
+  },
+  "driver_dropoff_phone_number": "string",
+  "driver_pickup_phone_number": "string",
+  "driver_vehicle_make": "string",
+  "driver_vehicle_model": "string",
+  "driver_vehicle_year": "number",
+  "dropoff_time_estimated": "string",
+  "pickup_address_street": "string",
+  "pickup_address_city": "string",
+  "pickup_address_country": "string",
+  "pickup_address_number": "string",
+  "pickup_address_county": "string",
+  "pickup_address_state": "string",
+  "pickup_address_postal_code": "string",
+  "pickup_address_latitude": "number",
+  "pickup_address_longitude": "number",
+  "pickup_phone_number": "string",
+  "pickup_instructions": "string",
+  "email": "string",
+  "dropoff_address_street": "string",
+  "dropoff_address_city": "string",
+  "dropoff_address_country": "string",
+  "dropoff_address_number": "string",
+  "dropoff_address_secondary_number": "string",
+  "dropoff_address_county": "string",
+  "dropoff_address_state": "string",
+  "dropoff_address_postal_code": "string",
+  "dropoff_address_latitude": "number",
+  "dropoff_address_longitude": "number",
+  "dropoff_phone_number": "string",
+  "dropoff_instructions": "string",
+  "dropoff_email": "string",
+  "package_description": "string",
+  "package_minimum_vehicle_size": "string",
+  "package_delivery_mode": "string",
+  "package_requirements": "array",
+  "items_count": "number",
+  "items": "array",
+  "weight": "number",
+  "dimentions": {
+    "height": "number",
+    "length": "number",
+    "width": "number"
+  },
+  "package_value": "number",
+  "pickup_start_time": "string",
+  "dropoff_start_time": "string",
+  "delivery_end_time": "string",
+  "dropoff_verification_image_url": "string",
+  "dropoff_signature_image_url": "string",
+  "cancellation_reason": "string",
+  "tip": "number",
+  "partner_reference": "string"
+}
+```
+
+### Field Descriptions
+
+| Field Name | Type | Description |
+| :--- | :--- | :--- |
+| `event_name` | string | The specific webhook event that triggered the notification (e.g., `pickup_complete`). |
+| `status` | string | The current high-level status of the delivery task. |
+| `price` | object | An object representing the total cost of the delivery. |
+| `price.value` | number | The total price of the delivery in a standard decimal format, converted from cents. |
+| `price.currency` | string | The ISO 4217 currency code for the price. |
+| `currency` | string | The ISO 4217 currency code for the transaction. |
+| `distance` | object | An object representing the estimated driving distance for the delivery. |
+| `distance.value` | number | The estimated driving distance value (e.g., in kilometers). |
+| `distance.unit` | string | The unit of measurement for the distance (e.g., `kilometers`). |
+| `pickup_name` | string | The full name of the contact person at the pickup location. |
+| `dropoff_name` | string | The full name of the contact person at the dropoff location. |
+| `delivery_date` | string | The scheduled date for the delivery to begin, formatted as `YYYY-MM-DD`. |
+| `delivery_start_time` | string | The scheduled start time for the delivery window, formatted as `HH:MM:SS`. |
+| `partner_payload` | object | An arbitrary object provided by the partner during job creation for their own reference. |
+| `driver_id` | number | A unique numeric identifier for the courier/driver. |
+| `driver_name` | string | The full name of the assigned courier. |
+| `driver_location` | object | The last known GPS coordinates of the driver. |
+| `driver_location.lat`| number | The latitude of the driver's location. |
+| `driver_location.lng`| number | The longitude of the driver's location. |
+| `driver_dropoff_phone_number` | string | The driver's phone number for dropoff-related communication. |
+| `driver_pickup_phone_number` | string | The driver's phone number for pickup-related communication. |
+| `driver_vehicle_make` | string | The make of the driver's vehicle (e.g., `Tesla`). |
+| `driver_vehicle_model` | string | The model of the driver's vehicle (e.g., `Model Z`). |
+| `driver_vehicle_year` | number | The manufacturing year of the driver's vehicle. |
+| `dropoff_time_estimated` | string | The estimated time of arrival at the dropoff location, in a standard datetime format. |
+| `pickup_address_street` | string | Street name of the pickup address. |
+| `pickup_address_city` | string | City of the pickup address. |
+| `pickup_address_country` | string | Country of the pickup address. |
+| `pickup_address_number` | string | Street number of the pickup address. |
+| `pickup_address_secondary_number` | string | Apartment or suite number for the pickup address. |
+| `pickup_address_county` | string | County of the pickup address. |
+| `pickup_address_state` | string | State of the pickup address. |
+| `pickup_address_postal_code` | string | Postal or ZIP code of the pickup address. |
+| `pickup_address_latitude` | number | Latitude coordinate of the pickup address. |
+| `pickup_address_longitude` | number | Longitude coordinate of the pickup address. |
+| `dropoff_address_street` | string | Street name of the dropoff address. |
+| `dropoff_address_city` | string | City of the dropoff address. |
+| `dropoff_address_country` | string | Country of the dropoff address. |
+| `dropoff_address_number` | string | Street number of the dropoff address. |
+| `dropoff_address_secondary_number` | string | Apartment or suite number for the dropoff address. |
+| `dropoff_address_county` | string | County of the dropoff address. |
+| `dropoff_address_state` | string | State of the dropoff address. |
+| `dropoff_address_postal_code` | string | Postal or ZIP code of the dropoff address. |
+| `dropoff_address_latitude` | number | Latitude coordinate of the dropoff address. |
+| `dropoff_address_longitude` | number | Longitude coordinate of the dropoff address. |
+| `pickup_phone_number` | string | The contact phone number for the pickup location. |
+| `pickup_instructions` | string | Special instructions for the courier at the pickup location. |
+| `email` | string | The email address of the contact person at the pickup location. |
+| `dropoff_phone_number` | string | The contact phone number for the dropoff location. |
+| `dropoff_instructions` | string | Special instructions for the courier at the dropoff location. |
+| `dropoff_email ` | string | The email of the entity to contact. |
+| `package_description`| string | A description of the contents of the package being delivered. |
+| `package_minimum_vehicle_size`| string | The minimum vehicle size required for this delivery (e.g., `CAR`, `BIKE`). |
+| `package_delivery_mode` | string | The delivery mode, indicating if it's on-demand (`NOW`) or scheduled. |
+| `package_requirements` | array | A list of special requirements for the delivery (e.g., `photo_proof_of_delivery`). |
+| `items_count` | number | The number of items in the package. |
+| `items` | array | A list of objects, each detailing an item in the package. Can be null. |
+| `weight` | number | The weight of the package. |
+| `dimentions` | object | The dimentions of the package. |
+| `package_value` | number | The declared value of the package, converted from cents. |
+| `pickup_start_time` | string | The start time of the pickup window, formatted as `HH:MM:SS`. |
+| `dropoff_start_time` | string | The start time of the dropoff window, formatted as `HH:MM:SS`. |
+| `delivery_end_time` | string | The end time of the dropoff window, formatted as `HH:MM:SS`. |
+| `dropoff_verification_image_url` | string | URL to a photo taken as proof of delivery. Available on relevant events. |
+| `dropoff_signature_image_url`| string | URL to a signature captured as proof of delivery. Available on relevant events. |
+| `cancellation_reason`| string | The reason for a delivery cancellation. Available on cancellation events. |
+| `tip` | number | The tip amount for the driver, converted from cents. |
+| `partner_reference`| string | A reference ID provided by the partner during job creation. |
+
+## Authentication Headers
+
+All webhook requests include the following headers:
+
+| Header          | Description                                                              |
+|-----------------|--------------------------------------------------------------------------|
+| `Content-Type`  | Set to `application/json`                                                |
+| `Accept`        | Set to `application/json`                                                |
+| `Authorization` | Bearer token containing a JWT encoded version of the request body.       |

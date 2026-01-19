@@ -1,97 +1,53 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: 'Introduction'
+description: 'UniHop API for managing deliveries and accessing delivery service providers'
 ---
 
-## Setting up
+## Welcome to the UniHop API
 
-Get your documentation site up and running in minutes.
+The UniHop API enables you to integrate on-demand delivery services into your application. With our API, you can create and manage delivery orders, track their status, and discover available delivery service providers.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+## Key Features
 
-## Make it yours
+- **Order Management** - Create, retrieve, and cancel delivery orders
+- **Service Discovery** - Get a list of available third-party delivery providers
+- **Real-time Tracking** - Monitor order status, driver location, and estimated delivery times
+- **Webhooks** - Receive real-time notifications about order status changes and delivery events
+- **Flexible Delivery Options** - Support for scheduled and on-demand deliveries
+- **Custom Integration** - Flexible payload support for partner-specific data
 
-Design a docs site that looks great and empowers your users.
+## Getting Started
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+### Base URL
 
-## Create beautiful pages
+All API requests are made to:
+```
+https://api.unihop.app/v1
+```
 
-Everything you need to create world-class documentation.
+### Authentication
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+All API endpoints require authentication using a JWT token. Include your token in the `Authorization` header of each request:
 
-## Need inspiration?
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+```
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+For details on obtaining and using JWT tokens, see the [Authentication](/auth) documentation.
+
+## Core Endpoints
+
+- **[Create Order](/api-reference/endpoint/create-order)** - Create a new delivery order
+- **[Get Order](/api-reference/endpoint/get)** - Retrieve order details
+- **[Get Partner Order](/api-reference/endpoint/get-partner-order)** - Retrieve order by partner reference
+- **[Cancel Order](/api-reference/endpoint/delete)** - Cancel a delivery order
+- **[Availability](/api-reference/endpoint/availability)** - List available delivery service providers
+- **[Webhooks](/webhooks)** - Set up real-time order tracking and event notifications
+
+## Response Format
+
+All API responses are returned in JSON format. Successful responses include relevant data, while error responses include error codes and descriptive messages.
+
+## Need Help?
+
+For questions or issues, please contact our support team.
