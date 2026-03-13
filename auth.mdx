@@ -46,11 +46,12 @@ A JWT consists of three parts separated by dots (`.`):
 
 For our API, your JWT **must** include the following claims in the payload:
 
-| Claim | Description | Example |
-|-------|-------------|---------|
-| `iss` | Issuer - Your partner_uid (provided by us) | `"iss": "your_partner_uid"` |
-| `iat` | Issued At - Current timestamp (seconds since epoch) | `"iat": 1686104400` |
-| `exp` | Expiration Time - Must be within 30 minutes of `iat` | `"exp": 1686106200` |
+| Claim | Description | Required | Example |
+|-------|-------------|----------|--------|
+| `iss` | Issuer - Your partner_uid (provided by us) | Yes | `"iss": "your_partner_uid"` |
+| `iat` | Issued At - Current timestamp (seconds since epoch) | Yes | `"iat": 1686104400` |
+| `exp` | Expiration Time - Must be within 30 minutes of `iat` | Yes | `"exp": 1686106200` |
+| `merchant_id` | Merchant identifier - Allows a partner to route requests to a specific merchant. Useful when integrating multiple merchants under a single partner account. | No | `"merchant_id": "merchant_abc123"` |
 
 ### Code Examples
 
@@ -69,7 +70,7 @@ $payload = [
     'iss' => 'your_partner_uid', // Replace with your partner_uid
     'iat' => time(),
     'exp' => time() + 1800, // 30 minutes
-    // Add any additional claims you need
+    'merchant_id' => 'merchant_abc123', // Optional: specify the merchant
 ];
 
 // Sign the JWT with RS256 algorithm
@@ -94,8 +95,8 @@ const privateKey = fs.readFileSync('private_key.pem');
 const payload = {
     iss: 'your_partner_uid', // Replace with your partner_uid
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 1800 // 30 minutes
-    // Add any additional claims you need
+    exp: Math.floor(Date.now() / 1000) + 1800, // 30 minutes
+    merchant_id: 'merchant_abc123' // Optional: specify the merchant
 };
 
 // Sign the JWT with RS256 algorithm
@@ -121,8 +122,8 @@ with open('private_key.pem', 'rb') as key_file:
 payload = {
     'iss': 'your_partner_uid',  # Replace with your partner_uid
     'iat': int(time.time()),
-    'exp': int(time.time()) + 1800  # 30 minutes
-    # Add any additional claims you need
+    'exp': int(time.time()) + 1800,  # 30 minutes
+    'merchant_id': 'merchant_abc123',  # Optional: specify the merchant
 }
 
 # Sign the JWT with RS256 algorithm
@@ -148,6 +149,7 @@ print(f"Bearer {token}")
    - The presence of required claims (`iss`, `iat`, `exp`)
    - That the token hasn't expired
    - That the expiration is within 30 minutes of issuance
+   - If `merchant_id` is provided, that it corresponds to a valid merchant under your partner account
 
 ## 3. 🔑 Share Your Public Key
 
@@ -376,5 +378,6 @@ If you're experiencing authentication issues, check:
 - You're using the correct private key to sign the token
 - We have your correct public key on file
 - The Authorization header format is correct (`Bearer <token>`)
+- If using `merchant_id`, verify the ID matches a merchant registered under your partner account
 
 For further assistance, contact our support team.

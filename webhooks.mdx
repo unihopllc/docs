@@ -45,6 +45,7 @@ All webhook requests are sent as `POST` requests with a JSON payload. The struct
 ```json
 {
   "event_name": "string",
+  "merchant_id": "string | null",
   "status": "string",
   "price": {
     "value": "number",
@@ -126,6 +127,7 @@ All webhook requests are sent as `POST` requests with a JSON payload. The struct
 | Field Name | Type | Description |
 | :--- | :--- | :--- |
 | `event_name` | string | The specific webhook event that triggered the notification (e.g., `pickup_complete`). |
+| `merchant_id` | string | The merchant identifier associated with this order, if one was provided in the JWT during order creation. `null` if not set. |
 | `status` | string | The current high-level status of the delivery task. |
 | `price` | object | An object representing the total cost of the delivery. |
 | `price.value` | number | The total price of the delivery in a standard decimal format, converted from cents. |

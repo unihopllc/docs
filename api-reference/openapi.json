@@ -67,302 +67,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "pickup_address_street": {
-                    "type": "string",
-                    "description": "Street name of the pickup address."
-                    },
-                    "pickup_address_city": {
-                      "type": "string",
-                      "description": "City of the pickup address."
-                    },
-                    "pickup_address_country": {
-                      "type": "string",
-                      "description": "Country of the pickup address."
-                    },
-                    "pickup_address_number": {
-                      "type": "string",
-                      "description": "Street number of the pickup address."
-                    },
-                    "pickup_address_secondary_number": {
-                      "type": "string",
-                      "description": "Apartment or suite number for the pickup address."
-                    },
-                    "pickup_address_county": {
-                      "type": "string",
-                      "description": "County of the pickup address."
-                    },
-                    "pickup_address_state": {
-                      "type": "string",
-                      "description": "State of the pickup address."
-                    },
-                    "pickup_address_postal_code": {
-                      "type": "string",
-                      "description": "Postal or ZIP code of the pickup address."
-                    },
-                    "pickup_address_latitude": {
-                      "type": "number",
-                      "description": "Latitude coordinate of the pickup address."
-                    },
-                    "pickup_address_longitude": {
-                      "type": "number",
-                      "description": "Longitude coordinate of the pickup address."
-                    },
-                
-                  "pickup_name": {
-                    "type": "string",
-                    "description": "Name of the contact person at the pickup location."
-                  },
-                  "pickup_phone_number": {
-                    "type": "string",
-                    "maxLength": 15,
-                    "description": "Phone number of the pickup contact person."
-                  },
-                  "pickup_instructions": {
-                    "type": "string",
-                    "maxLength": 512,
-                    "description": "Additional instructions for the pickup."
-                  },
-                    "dropoff_start_time": {
-                    "type": "string",
-                    "format": "date-time",
-                    "description": "Preferred start time for dropoff in ISO 8601 format (YYYY-MM-DDTHH:MM:SS±HH:MM)."
-                  },
-                  "pickup_start_time": {
-                  "type": "string",
-                  "format": "date-time",
-                  "description": "Preferred start time for pickup in ISO 8601 format (YYYY-MM-DDTHH:MM:SS±HH:MM)."
-                  },
-                  "weight": {
-                    "type": "number",
-                    "minimum": 0,
-                    "description": "Weight of the package in lbs."
-                  },
-                  "dimensions": {
-                    "type": "object",
-                    "properties": {
-                      "length": {
-                        "type": "number",
-                        "minimum": 0,
-                        "description": "Length of the package in inches."
-                      },
-                      "width": {
-                        "type": "number",
-                        "minimum": 0,
-                        "description": "Width of the package in inches."
-                      },
-                      "height": {
-                        "type": "number",
-                        "minimum": 0,
-                        "description": "Height of the package in inches."
-                      }
-                    },
-                    "required": [
-                      "length",
-                      "width",
-                      "height"
-                    ],
-                    "description": "Dimensions of the package."
-                  },
-                  "dropoff_address_street": {
-                    "type": "string",
-                    "description": "Street name of the dropoff address."
-                  },
-                  "dropoff_address_city": {
-                    "type": "string",
-                    "description": "City of the dropoff address."
-                  },
-                  "dropoff_address_country": {
-                    "type": "string",
-                    "description": "Country of the dropoff address."
-                  },
-                  "dropoff_address_number": {
-                    "type": "string",
-                    "description": "Street number of the dropoff address."
-                  },
-                  "dropoff_address_secondary_number": {
-                    "type": "string",
-                    "description": "Apartment or suite number for the dropoff address."
-                  },
-                  "dropoff_address_county": {
-                    "type": "string",
-                    "description": "County of the dropoff address."
-                  },
-                  "dropoff_address_state": {
-                    "type": "string",
-                    "description": "State of the dropoff address."
-                  },
-                  "dropoff_address_postal_code": {
-                    "type": "string",
-                    "description": "Postal or ZIP code of the dropoff address."
-                  },
-                  "dropoff_address_latitude": {
-                    "type": "number",
-                    "description": "Latitude coordinate of the dropoff address."
-                  },
-                  "dropoff_address_longitude": {
-                    "type": "number",
-                    "description": "Longitude coordinate of the dropoff address."
-                  },
-                  "dropoff_name": {
-                    "type": "string",
-                    "description": "Name of the contact person at the dropoff location."
-                  },
-                  "dropoff_phone_number": {
-                    "type": "string",
-                    "maxLength": 15,
-                    "description": "Phone number of the dropoff contact person."
-                  },
-                  "dropoff_instructions": {
-                    "type": "string",
-                    "maxLength": 512,
-                    "description": "Additional instructions for the dropoff."
-                  },
-                  "dropoff_email": {
-                    "type": "string",
-                    "format": "email",
-                    "description": "Email address of the dropoff contact person."
-                  },
-                  "package_minimum_vehicle_size": {
-                    "type": "string",
-                    "enum": [
-                      "SEDAN",
-                      "CAR",
-                      "SUV",
-                      "PICKUP_TRUCK",
-                      "VAN",
-                      "TRUCK",
-                      "LARGE_VAN",
-                      "EXTRA_LARGE_VAN",
-                      "PICKUP"
-                    ],
-                    "description": "Minimum vehicle type required to transport the package."
-                  },
-                  "package_delivery_mode": {
-                    "type": "string",
-                    "enum": [
-                      "NOW",
-                      "SCHEDULED"
-                    ],
-                    "description": "Mode of delivery (NOW or SCHEDULED)."
-                  },
-                  "package_description": {
-                    "type": "string",
-                    "maxLength": 512,
-                    "description": "Description of the package contents."
-                  },
-                  "package_requirements": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "enum": [
-                        "PHOTO_PROOF_OF_DELIVERY",
-                        "SIGNATURE_PROOF_OF_DELIVERY",
-                        "TWO_PERSON_TEAM"
-                      ]
-                    },
-                    "description": "Special delivery or pickup requirements."
-                  },
-                  "package_pickup_start_time": {
-                    "type": "string",
-                    "format": "time",
-                    "description": "Preferred pickup time for the package (HH:MM:SS)."
-                  },
-                  "items": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": "string"
-                        },
-                        "quantity": {
-                          "type": "integer"
-                        },
-                        "external_id": {
-                          "type": "string"
-                        },
-                        "external_instance_id": {
-                          "type": "string"
-                        },
-                        "price": {
-                          "type": "integer"
-                        },
-                        "barcode": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "name",
-                        "quantity"
-                      ]
-                    },
-                    "description": "List of items included in the delivery."
-                  },
-                  "items_count": {
-                    "type": "integer",
-                    "description": "Total count of items."
-                  },
-                  "email": {
-                    "type": "string",
-                    "format": "email",
-                    "description": "Customer email address for notifications."
-                  },
-                  "delivery_date": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Preferred delivery date (YYYY-MM-DD)."
-                  },
-                  "delivery_start_time": {
-                    "type": "string",
-                    "format": "time",
-                    "description": "Start time of the delivery window (HH:MM:SS)."
-                  },
-                  "delivery_end_time": {
-                    "type": "string",
-                    "format": "time",
-                    "description": "End time of the delivery window (HH:MM:SS)."
-                  },
-                  "package_value": {
-                    "type": "number",
-                    "minimum": 0,
-                    "description": "Monetary value of the package."
-                  },
-                  "tip": {
-                    "type": "number",
-                    "minimum": 0,
-                    "description": "Optional tip for the delivery."
-                  },
-                  "currency": {
-                    "type": "string",
-                    "maxLength": 3,
-                    "description": "The intended currency."
-                  },
-                  "partner_reference": {
-                    "type": "string",
-                    "maxLength": 256,
-                    "description": "Custom reference provided by the partner."
-                  },
-                  "partner_payload": {
-                    "type": "object",
-                    "format": "json",
-                    "description": "Optional custom payload for partner systems."
-                  }
-                },
-                "required": [
-                  "pickup_address_city",
-                  "pickup_address_country",
-                  "pickup_address_street",
-                  "pickup_name",
-                  "dropoff_address",
-                  "dropoff_name",
-                  "email",
-                  "currency"
-                ]
+                "$ref": "#/components/schemas/OrderRequest"
               }
             }
           }
@@ -509,6 +214,44 @@
         }
       }
     },
+    "/quote": {
+      "post": {
+        "description": "Returns a price quote for a delivery without creating an order. Accepts the same parameters as creating an order.",
+        "requestBody": {
+          "description": "Delivery details to quote",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quote returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/availability": {
       "get": {
         "summary": "Get service availability",
@@ -552,6 +295,11 @@
         "type": "string",
         "description": "The unique identifier for the order.",
         "example": "job_123abc456def"
+      },
+      "merchant_id": {
+        "type": ["string", "null"],
+        "description": "The merchant identifier associated with this order. Present when the partner specified a merchant_id in the JWT during order creation. Allows partners to manage multiple merchants under a single account.",
+        "example": "merchant_abc123"
       },
       "status": {
         "type": "string",
@@ -840,6 +588,318 @@
     }
   }
       },
+      "OrderRequest": {
+        "type": "object",
+        "properties": {
+          "pickup_address_street": {
+            "type": "string",
+            "description": "Street name of the pickup address."
+          },
+          "pickup_address_city": {
+            "type": "string",
+            "description": "City of the pickup address."
+          },
+          "pickup_address_country": {
+            "type": "string",
+            "description": "Country of the pickup address."
+          },
+          "pickup_address_number": {
+            "type": "string",
+            "description": "Street number of the pickup address."
+          },
+          "pickup_address_secondary_number": {
+            "type": "string",
+            "description": "Apartment or suite number for the pickup address."
+          },
+          "pickup_address_county": {
+            "type": "string",
+            "description": "County of the pickup address."
+          },
+          "pickup_address_state": {
+            "type": "string",
+            "description": "State of the pickup address."
+          },
+          "pickup_address_postal_code": {
+            "type": "string",
+            "description": "Postal or ZIP code of the pickup address."
+          },
+          "pickup_address_latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the pickup address."
+          },
+          "pickup_address_longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the pickup address."
+          },
+          "pickup_name": {
+            "type": "string",
+            "description": "Name of the contact person at the pickup location."
+          },
+          "pickup_phone_number": {
+            "type": "string",
+            "maxLength": 15,
+            "description": "Phone number of the pickup contact person."
+          },
+          "pickup_instructions": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Additional instructions for the pickup."
+          },
+          "dropoff_start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Preferred start time for dropoff in ISO 8601 format (YYYY-MM-DDTHH:MM:SS±HH:MM)."
+          },
+          "pickup_start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Preferred start time for pickup in ISO 8601 format (YYYY-MM-DDTHH:MM:SS±HH:MM)."
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Weight of the package in lbs."
+          },
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "length": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Length of the package in inches."
+              },
+              "width": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Width of the package in inches."
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Height of the package in inches."
+              }
+            },
+            "required": ["length", "width", "height"],
+            "description": "Dimensions of the package."
+          },
+          "dropoff_address_street": {
+            "type": "string",
+            "description": "Street name of the dropoff address."
+          },
+          "dropoff_address_city": {
+            "type": "string",
+            "description": "City of the dropoff address."
+          },
+          "dropoff_address_country": {
+            "type": "string",
+            "description": "Country of the dropoff address."
+          },
+          "dropoff_address_number": {
+            "type": "string",
+            "description": "Street number of the dropoff address."
+          },
+          "dropoff_address_secondary_number": {
+            "type": "string",
+            "description": "Apartment or suite number for the dropoff address."
+          },
+          "dropoff_address_county": {
+            "type": "string",
+            "description": "County of the dropoff address."
+          },
+          "dropoff_address_state": {
+            "type": "string",
+            "description": "State of the dropoff address."
+          },
+          "dropoff_address_postal_code": {
+            "type": "string",
+            "description": "Postal or ZIP code of the dropoff address."
+          },
+          "dropoff_address_latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the dropoff address."
+          },
+          "dropoff_address_longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the dropoff address."
+          },
+          "dropoff_name": {
+            "type": "string",
+            "description": "Name of the contact person at the dropoff location."
+          },
+          "dropoff_phone_number": {
+            "type": "string",
+            "maxLength": 15,
+            "description": "Phone number of the dropoff contact person."
+          },
+          "dropoff_instructions": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Additional instructions for the dropoff."
+          },
+          "dropoff_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address of the dropoff contact person."
+          },
+          "package_minimum_vehicle_size": {
+            "type": "string",
+            "enum": ["SEDAN", "CAR", "SUV", "PICKUP_TRUCK", "VAN", "TRUCK", "LARGE_VAN", "EXTRA_LARGE_VAN", "PICKUP"],
+            "description": "Minimum vehicle type required to transport the package."
+          },
+          "package_delivery_mode": {
+            "type": "string",
+            "enum": ["NOW", "SCHEDULED"],
+            "description": "Mode of delivery (NOW or SCHEDULED)."
+          },
+          "package_description": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Description of the package contents."
+          },
+          "package_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["PHOTO_PROOF_OF_DELIVERY", "SIGNATURE_PROOF_OF_DELIVERY", "TWO_PERSON_TEAM"]
+            },
+            "description": "Special delivery or pickup requirements."
+          },
+          "package_pickup_start_time": {
+            "type": "string",
+            "format": "time",
+            "description": "Preferred pickup time for the package (HH:MM:SS)."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "description": { "type": "string" },
+                "quantity": { "type": "integer" },
+                "external_id": { "type": "string" },
+                "external_instance_id": { "type": "string" },
+                "price": { "type": "integer" },
+                "barcode": { "type": "string" }
+              },
+              "required": ["name", "quantity"]
+            },
+            "description": "List of items included in the delivery."
+          },
+          "items_count": {
+            "type": "integer",
+            "description": "Total count of items."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email address for notifications."
+          },
+          "delivery_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Preferred delivery date (YYYY-MM-DD)."
+          },
+          "delivery_start_time": {
+            "type": "string",
+            "format": "time",
+            "description": "Start time of the delivery window (HH:MM:SS)."
+          },
+          "delivery_end_time": {
+            "type": "string",
+            "format": "time",
+            "description": "End time of the delivery window (HH:MM:SS)."
+          },
+          "package_value": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Monetary value of the package."
+          },
+          "tip": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Optional tip for the delivery."
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3,
+            "description": "The intended currency."
+          },
+          "partner_reference": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Custom reference provided by the partner."
+          },
+          "partner_payload": {
+            "type": "object",
+            "format": "json",
+            "description": "Optional custom payload for partner systems."
+          }
+        },
+        "required": [
+          "pickup_address_city",
+          "pickup_address_country",
+          "pickup_address_street",
+          "pickup_name",
+          "dropoff_address",
+          "dropoff_name",
+          "email",
+          "currency"
+        ]
+      },
+      "QuoteResponse": {
+        "type": "object",
+        "description": "Successful response returned for a delivery quote. Contains the same fields as an order creation response plus a price estimate.",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Quote generated successfully"
+          },
+          "uid": {
+            "type": "string",
+            "description": "Unique identifier of the quote",
+            "example": "quote_123456"
+          },
+          "merchant_id": {
+            "type": ["string", "null"],
+            "description": "The merchant identifier associated with this quote, if provided in the JWT.",
+            "example": "merchant_abc123"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "example": "quoted"
+              },
+              "partner_reference": {
+                "type": ["string", "null"],
+                "example": "partner_xyz_001"
+              }
+            },
+            "required": ["status"]
+          },
+          "price": {
+            "type": "object",
+            "description": "The estimated price for the delivery.",
+            "properties": {
+              "value": {
+                "type": "number",
+                "format": "float",
+                "description": "The estimated cost of the delivery.",
+                "example": 12.50
+              },
+              "currency": {
+                "type": "string",
+                "description": "The currency of the price.",
+                "example": "USD"
+              }
+            },
+            "required": ["value", "currency"]
+          }
+        },
+        "required": ["message", "uid", "data", "price"]
+      },
       "OrderCreated": {
         "type": "object",
         "description": "Successful response returned after an order is created.",
@@ -852,6 +912,11 @@
             "type": "string",
             "description": "Unique identifier of the created order",
             "example": "ord_123456"
+          },
+          "merchant_id": {
+            "type": ["string", "null"],
+            "description": "The merchant identifier associated with this order, if provided in the JWT.",
+            "example": "merchant_abc123"
           },
           "data": {
             "type": "object",
