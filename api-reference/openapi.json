@@ -296,11 +296,6 @@
         "description": "The unique identifier for the order.",
         "example": "job_123abc456def"
       },
-      "merchant_id": {
-        "type": ["string", "null"],
-        "description": "The merchant identifier associated with this order. Present when the partner specified a merchant_id in the JWT during order creation. Allows partners to manage multiple merchants under a single account.",
-        "example": "merchant_abc123"
-      },
       "status": {
         "type": "string",
         "description": "The current status of the order.",
@@ -584,10 +579,15 @@
       "tip": {
         "type": "number",
         "description": "The tip amount for the driver, converted from cents."
-
-    }
-  }
       },
+      "tracking_url": {
+        "type": "string",
+        "format": "uri",
+        "description": "A URL to track the delivery in real time.",
+        "example": "https://track.unihop.app/ord_123456"
+      }
+    }
+  },
       "OrderRequest": {
         "type": "object",
         "properties": {
@@ -860,11 +860,6 @@
             "description": "Unique identifier of the quote",
             "example": "quote_123456"
           },
-          "merchant_id": {
-            "type": ["string", "null"],
-            "description": "The merchant identifier associated with this quote, if provided in the JWT.",
-            "example": "merchant_abc123"
-          },
           "data": {
             "type": "object",
             "properties": {
@@ -913,11 +908,6 @@
             "description": "Unique identifier of the created order",
             "example": "ord_123456"
           },
-          "merchant_id": {
-            "type": ["string", "null"],
-            "description": "The merchant identifier associated with this order, if provided in the JWT.",
-            "example": "merchant_abc123"
-          },
           "data": {
             "type": "object",
             "properties": {
@@ -931,6 +921,12 @@
               }
             },
             "required": ["status"]
+          },
+          "tracking_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URL to track the delivery in real time.",
+            "example": "https://track.unihop.app/ord_123456"
           }
         },
         "required": ["message", "uid", "data"]
