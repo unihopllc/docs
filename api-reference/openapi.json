@@ -197,9 +197,51 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "Order deleted",
-            "content": {}
+          "200": {
+            "description": "Order cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Order cancelled successfully"
+                    },
+                    "uid": {
+                      "type": "string",
+                      "description": "The job ID of the cancelled order"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "example": "Canceled"
+                        },
+                        "partner_reference": {
+                          "type": "string",
+                          "description": "The partner reference for the order"
+                        },
+                        "cancelation_fee": {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "number",
+                              "description": "The cancellation fee amount"
+                            },
+                            "currency": {
+                              "type": "string",
+                              "description": "The currency of the cancellation fee"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "unexpected error",
