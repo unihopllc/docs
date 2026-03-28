@@ -228,6 +228,7 @@
                           "properties": {
                             "value": {
                               "type": "number",
+                              "format": "float",
                               "description": "The cancellation fee amount"
                             },
                             "currency": {
@@ -265,7 +266,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OrderRequest"
+                "$ref": "#/components/schemas/QuoteRequest"
               }
             }
           }
@@ -592,6 +593,7 @@
       },
       "package_value": {
         "type": "number",
+        "format": "float",
         "description": "The declared value of the package, converted from cents."
       },
       "pickup_start_time": {
@@ -620,6 +622,7 @@
       },
       "tip": {
         "type": "number",
+        "format": "float",
         "description": "The tip amount for the driver, converted from cents."
       },
       "tracking_url": {
@@ -627,6 +630,21 @@
         "format": "uri",
         "description": "A URL to track the delivery in real time.",
         "example": "https://track.unihop.app/ord_123456"
+      },
+      "expected_cancelation_fee": {
+        "type": "object",
+        "description": "The expected cancellation fee for the order.",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "description": "The cancellation fee amount.",
+            "example": "0.00"
+          },
+          "currency": {
+            "type": "string",
+            "description": "The currency of the cancellation fee."
+          }
+        }
       }
     }
   },
@@ -821,7 +839,7 @@
                 "quantity": { "type": "integer" },
                 "external_id": { "type": "string" },
                 "external_instance_id": { "type": "string" },
-                "price": { "type": "integer" },
+                "price": { "type": "number", "format": "float" },
                 "barcode": { "type": "string" }
               },
               "required": ["name", "quantity"]
@@ -854,11 +872,13 @@
           },
           "package_value": {
             "type": "number",
+            "format": "float",
             "minimum": 0,
             "description": "Monetary value of the package."
           },
           "tip": {
             "type": "number",
+            "format": "float",
             "minimum": 0,
             "description": "Optional tip for the delivery."
           },
@@ -889,53 +909,67 @@
           "currency"
         ]
       },
+      "QuoteRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/OrderRequest" },
+          {
+            "type": "object",
+            "properties": {
+              "delivery_style": {
+                "type": "string",
+                "nullable": true,
+                "enum": ["Standard", "Special Handling"],
+                "description": "The delivery style. Can be Standard or Special Handling."
+              }
+            }
+          }
+        ]
+      },
       "QuoteResponse": {
         "type": "object",
-        "description": "Successful response returned for a delivery quote. Contains the same fields as an order creation response plus a price estimate.",
+        "description": "Successful response returned for a delivery quote.",
         "properties": {
           "message": {
             "type": "string",
-            "example": "Quote generated successfully"
-          },
-          "uid": {
-            "type": "string",
-            "description": "Unique identifier of the quote",
-            "example": "quote_123456"
+            "example": "Quote created successfully"
           },
           "data": {
             "type": "object",
             "properties": {
-              "status": {
-                "type": "string",
-                "example": "quoted"
+              "price": {
+                "type": "object",
+                "properties": {
+                  "delivery_fee": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The estimated delivery fee.",
+                    "example": 12.5
+                  },
+                  "tip": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The tip amount.",
+                    "example": 23
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "The currency of the delivery fee.",
+                    "example": "USD"
+                  }
+                },
+                "required": ["delivery_fee", "tip", "currency"]
               },
-              "partner_reference": {
-                "type": ["string", "null"],
-                "example": "partner_xyz_001"
-              }
-            },
-            "required": ["status"]
-          },
-          "price": {
-            "type": "object",
-            "description": "The estimated price for the delivery.",
-            "properties": {
-              "value": {
+              "distance": {
                 "type": "number",
                 "format": "float",
-                "description": "The estimated cost of the delivery.",
-                "example": 12.50
-              },
-              "currency": {
-                "type": "string",
-                "description": "The currency of the price.",
-                "example": "USD"
+                "description": "The delivery distance in miles.",
+                "example": 0.61
               }
             },
-            "required": ["value", "currency"]
+            "required": ["price", "distance"]
           }
         },
-        "required": ["message", "uid", "data", "price"]
+        "required": ["message", "data"]
       },
       "OrderCreated": {
         "type": "object",
@@ -997,11 +1031,12 @@
         "type": "object",
         "properties": {
           "error": {
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "description": "A string error code identifying the type of error."
           },
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "A human-readable message describing the error."
           }
         }
       },
