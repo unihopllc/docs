@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "https://api.unihop.app/v1"
+      "url": "https://backend.unihop.app/api/v1"
     }
   ],
   "security": [
@@ -645,6 +645,12 @@
             "description": "The currency of the cancellation fee."
           }
         }
+      },
+      "delivery_style": {
+        "type": "string",
+        "nullable": true,
+        "enum": ["Standard", "Special Handling"],
+        "description": "The delivery style. Can be Standard or Special Handling. Please contact us to unlock more delivery styles and associated features."
       }
     }
   },
@@ -896,6 +902,12 @@
             "type": "object",
             "format": "json",
             "description": "Optional custom payload for partner systems."
+          },
+          "delivery_style": {
+            "type": "string",
+            "nullable": true,
+            "enum": ["Standard", "Special Handling"],
+            "description": "The delivery style. Can be Standard or Special Handling. Please contact us to unlock more delivery styles and associated features."
           }
         },
         "required": [
@@ -910,20 +922,7 @@
         ]
       },
       "QuoteRequest": {
-        "allOf": [
-          { "$ref": "#/components/schemas/OrderRequest" },
-          {
-            "type": "object",
-            "properties": {
-              "delivery_style": {
-                "type": "string",
-                "nullable": true,
-                "enum": ["Standard", "Special Handling"],
-                "description": "The delivery style. Can be Standard or Special Handling."
-              }
-            }
-          }
-        ]
+        "$ref": "#/components/schemas/OrderRequest"
       },
       "QuoteResponse": {
         "type": "object",
