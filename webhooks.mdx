@@ -139,7 +139,7 @@ All webhook requests are sent as `POST` requests with a JSON payload. The struct
 | `pickup_name` | string | The full name of the contact person at the pickup location. |
 | `dropoff_name` | string | The full name of the contact person at the dropoff location. |
 | `delivery_date` | string | The scheduled date for the delivery to begin, formatted as `YYYY-MM-DD`. |
-| `delivery_start_time` | string | The scheduled start time for the delivery window, formatted as `HH:MM:SS`. |
+| `delivery_start_time` | string | The scheduled start of the delivery window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`). |
 | `partner_payload` | object | An arbitrary object provided by the partner during job creation for their own reference. |
 | `driver_id` | number | A unique numeric identifier for the courier/driver. |
 | `driver_name` | string | The full name of the assigned courier. |
@@ -187,9 +187,9 @@ All webhook requests are sent as `POST` requests with a JSON payload. The struct
 | `weight` | number | The weight of the package. |
 | `dimentions` | object | The dimentions of the package. |
 | `package_value` | number | The declared value of the package, converted from cents. |
-| `pickup_start_time` | string | The start time of the pickup window, formatted as `HH:MM:SS`. |
-| `dropoff_start_time` | string | The start time of the dropoff window, formatted as `HH:MM:SS`. |
-| `delivery_end_time` | string | The end time of the dropoff window, formatted as `HH:MM:SS`. |
+| `pickup_start_time` | string | The start of the pickup window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`). |
+| `dropoff_start_time` | string | The start of the dropoff window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`). |
+| `delivery_end_time` | string | The end of the dropoff window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`). |
 | `dropoff_verification_image_url` | string | URL to a photo taken as proof of delivery. Available on relevant events. |
 | `dropoff_signature_image_url`| string | URL to a signature captured as proof of delivery. Available on relevant events. |
 | `cancellation_reason`| string | The reason for a delivery cancellation. Available on cancellation events. |

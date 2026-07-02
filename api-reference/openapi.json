@@ -387,11 +387,11 @@
       },
       "delivery_date": {
         "type": "string",
-        "description": "The scheduled date for the delivery to begin, formatted as `YYYY-MM-DD`."
+        "description": "The scheduled delivery date, as a full ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
       },
       "delivery_start_time": {
         "type": "string",
-        "description": "The scheduled start time for the delivery window, formatted as `HH:MM:SS`."
+        "description": "The scheduled start of the delivery window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
       },
       "driver_id": {
         "type": "number",
@@ -598,15 +598,15 @@
       },
       "pickup_start_time": {
         "type": "string",
-        "description": "The start time of the pickup window, formatted as `HH:MM:SS`."
+        "description": "The start of the pickup window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
       },
       "dropoff_start_time": {
         "type": "string",
-        "description": "The start time of the dropoff window, formatted as `HH:MM:SS`."
+        "description": "The start of the dropoff window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
       },
       "delivery_end_time": {
         "type": "string",
-        "description": "The end time of the dropoff window, formatted as `HH:MM:SS`."
+        "description": "The end of the dropoff window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
       },
       "dropoff_verification_image_url": {
         "type": "string",
@@ -714,12 +714,12 @@
           "dropoff_start_time": {
             "type": "string",
             "format": "date-time",
-            "description": "Preferred start time for dropoff in ISO 8601 format (YYYY-MM-DDTHH:MM:SS±HH:MM)."
+            "description": "Start of the dropoff window as an ISO 8601 UTC datetime with a trailing `Z` (YYYY-MM-DDTHH:MM:SSZ). Numeric offsets (e.g. +01:00) are not accepted. Required unless `package_delivery_mode` is `NOW`."
           },
           "pickup_start_time": {
             "type": "string",
             "format": "date-time",
-            "description": "Preferred start time for pickup in ISO 8601 format (YYYY-MM-DDTHH:MM:SS±HH:MM)."
+            "description": "Start of the pickup window as an ISO 8601 UTC datetime with a trailing `Z` (YYYY-MM-DDTHH:MM:SSZ). Numeric offsets (e.g. +01:00) are not accepted."
           },
           "weight": {
             "type": "number",
@@ -830,11 +830,6 @@
             },
             "description": "Special delivery or pickup requirements."
           },
-          "package_pickup_start_time": {
-            "type": "string",
-            "format": "time",
-            "description": "Preferred pickup time for the package (HH:MM:SS)."
-          },
           "items": {
             "type": "array",
             "items": {
@@ -864,7 +859,7 @@
           "delivery_date": {
             "type": "string",
             "format": "date",
-            "description": "Preferred delivery date (YYYY-MM-DD)."
+            "description": "Delivery date (YYYY-MM-DD). Required unless `package_delivery_mode` is `NOW`. If a time component is included it is honoured; otherwise `dropoff_start_time` is used to determine the scheduled moment."
           },
           "delivery_start_time": {
             "type": "string",
