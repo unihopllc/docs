@@ -1,53 +1,27 @@
 ---
-title: 'Introduction'
-description: 'UniHop API for managing deliveries and accessing delivery service providers'
+title: 'UniHop API'
+description: 'Last-mile delivery for local businesses across the U.S. and Canada'
 ---
 
-## Welcome to the UniHop API
+UniHop moves packages the last mile. You send us a pickup, a dropoff, and when it needs to happen. We source a driver, and our dispatch team watches the delivery through to the doorstep.
 
-The UniHop API enables you to integrate on-demand delivery services into your application. With our API, you can create and manage delivery orders, track their status, and discover available delivery service providers.
+There are two ways to integrate. Pick the one that matches who owns the orders.
 
-## Key Features
+<CardGroup cols={2}>
+  <Card title="Partner API" icon="building" href="/partners/index">
+    For a business booking its own deliveries, and for marketplaces booking for the sellers they host. You get an account of your own, signed-JWT authentication, and one bill for everything through the integration.
+  </Card>
+  <Card title="Platform API" icon="puzzle-piece" href="/platforms/index">
+    For software that other businesses install and book through, like a checkout scheduling app or an order management system. Each merchant uses their own API key and is billed on their own account.
+  </Card>
+</CardGroup>
 
-- **Order Management** - Create, retrieve, and cancel delivery orders
-- **Service Discovery** - Get a list of available third-party delivery providers
-- **Real-time Tracking** - Monitor order status, driver location, and estimated delivery times
-- **Webhooks** - Receive real-time notifications about order status changes and delivery events
-- **Flexible Delivery Options** - Support for scheduled and on-demand deliveries
-- **Custom Integration** - Flexible payload support for partner-specific data
+## Both integrations share
 
-## Getting Started
+The same delivery engine, the same dispatch team, and the same delivery styles. Requests and responses use the same field names, and both can receive webhooks as a delivery moves.
 
-### Base URL
+What differs is who authenticates, and who pays.
 
-All API requests are made to:
-```
-https://backend.unihop.app/api/v1
-```
+## Need a hand?
 
-### Authentication
-
-All API endpoints require authentication using a JWT token. Include your token in the `Authorization` header of each request:
-
-```
-Authorization: Bearer YOUR_JWT_TOKEN
-```
-
-For details on obtaining and using JWT tokens, see the [Authentication](/auth) documentation.
-
-## Core Endpoints
-
-- **[Create Order](/api-reference/endpoint/create-order)** - Create a new delivery order
-- **[Get Order](/api-reference/endpoint/get)** - Retrieve order details
-- **[Get Partner Order](/api-reference/endpoint/get-partner-order)** - Retrieve order by partner reference
-- **[Cancel Order](/api-reference/endpoint/delete)** - Cancel a delivery order
-- **[Availability](/api-reference/endpoint/availability)** - List available delivery service providers
-- **[Webhooks](/webhooks)** - Set up real-time order tracking and event notifications
-
-## Response Format
-
-All API responses are returned in JSON format. Successful responses include relevant data, while error responses include error codes and descriptive messages.
-
-## Need Help?
-
-For questions or issues, please contact our support team.
+Your account manager handles accounts, delivery styles, and coverage. Integration questions: [help.unihop.app](https://help.unihop.app).

@@ -11,25 +11,59 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Overview",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "index"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Partner API",
         "groups": [
           {
             "group": "Documentation",
             "pages": [
-              "index",
-              "auth",
-              "webhooks"
+              "partners/index",
+              "partners/authentication",
+              "partners/webhooks"
             ]
           },
           {
             "group": "Endpoints",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/get-partner-order",
-              "api-reference/endpoint/create-order",
-              "api-reference/endpoint/quote",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/availability"
+              "partners/api-reference/endpoint/quote",
+              "partners/api-reference/endpoint/create-order",
+              "partners/api-reference/endpoint/get",
+              "partners/api-reference/endpoint/get-partner-order",
+              "partners/api-reference/endpoint/delete",
+              "partners/api-reference/endpoint/availability"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Platform API",
+        "groups": [
+          {
+            "group": "Documentation",
+            "pages": [
+              "platforms/index",
+              "platforms/authentication",
+              "platforms/webhooks"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "platforms/api-reference/endpoint/quote",
+              "platforms/api-reference/endpoint/create-delivery",
+              "platforms/api-reference/endpoint/get-delivery",
+              "platforms/api-reference/endpoint/cancel-delivery",
+              "platforms/api-reference/endpoint/availability"
             ]
           }
         ]
@@ -38,6 +72,40 @@
     "global": {
     }
   },
+  "redirects": [
+    {
+      "source": "/auth",
+      "destination": "/partners/authentication"
+    },
+    {
+      "source": "/webhooks",
+      "destination": "/partners/webhooks"
+    },
+    {
+      "source": "/api-reference/endpoint/quote",
+      "destination": "/partners/api-reference/endpoint/quote"
+    },
+    {
+      "source": "/api-reference/endpoint/create-order",
+      "destination": "/partners/api-reference/endpoint/create-order"
+    },
+    {
+      "source": "/api-reference/endpoint/get",
+      "destination": "/partners/api-reference/endpoint/get"
+    },
+    {
+      "source": "/api-reference/endpoint/get-partner-order",
+      "destination": "/partners/api-reference/endpoint/get-partner-order"
+    },
+    {
+      "source": "/api-reference/endpoint/delete",
+      "destination": "/partners/api-reference/endpoint/delete"
+    },
+    {
+      "source": "/api-reference/endpoint/availability",
+      "destination": "/partners/api-reference/endpoint/availability"
+    }
+  ],
   "logo": {
     "light": "/logo/light_bunny.png",
     "dark": "/logo/dark_bunny.png"

@@ -1,0 +1,55 @@
+---
+title: 'Partner Integrations'
+description: 'Book and track UniHop deliveries on your own account'
+---
+
+## Who this is for
+
+A business booking its own deliveries, and marketplaces booking on behalf of the sellers they host.
+
+You get a partner account of your own, signed-JWT authentication, and an optional `merchant_id` claim to attribute an order to a specific seller. Everything through the integration is billed to your account.
+
+<Note>
+  Building software that other businesses install and book through, like a checkout scheduling app or an order management system? Use the [Platform API](/platforms/index). There, each merchant authenticates with their own UniHop API key and is billed on their own account.
+</Note>
+
+## Base URL
+
+```
+https://backend.unihop.app/api/v1
+```
+
+## Authentication
+
+Every request carries a JWT you sign with your private key, in the `Authorization` header:
+
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+```
+
+See [Authentication](/partners/authentication) for generating your key pair, the required claims, and code samples.
+
+## Endpoints
+
+| | |
+| --- | --- |
+| [Get Quote](/partners/api-reference/endpoint/quote) | Price and distance, nothing created |
+| [Create Order](/partners/api-reference/endpoint/create-order) | Book a delivery and send it to dispatch |
+| [Get Order](/partners/api-reference/endpoint/get) | Status, courier, ETA, proof of delivery |
+| [Get Order by Partner Reference](/partners/api-reference/endpoint/get-partner-order) | The same, keyed on your own reference |
+| [Cancel Order](/partners/api-reference/endpoint/delete) | Before pickup, with the fee stated up front |
+| [Availability](/partners/api-reference/endpoint/availability) | A liveness check before offering delivery |
+
+## Tracking and updates
+
+Every created order returns a tracking link, a public page you can give the recipient with no login.
+
+For programmatic updates, register a webhook URL and we'll push every status change as it happens. See [Webhooks](/partners/webhooks).
+
+## Response format
+
+All responses are JSON. Successful responses carry the relevant data. Errors carry a machine-readable code and a human-readable message.
+
+## Need a hand?
+
+Your account manager handles accounts, delivery styles, and coverage. Integration questions: [help.unihop.app](https://help.unihop.app).

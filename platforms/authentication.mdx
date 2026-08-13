@@ -1,0 +1,90 @@
+---
+title: 'Authentication'
+description: 'One API key, sent as a bearer token'
+---
+
+## How it works
+
+Two things identify a request:
+
+1. **Your platform identifier**, in the URL path (`/api/v1/your_platform/deliveries`). It tells us the delivery came through you.
+2. **The merchant's API key**, in the `Authorization` header. It tells us whose delivery it is and which account to bill.
+
+```
+Authorization: Bearer live_eyJpdiI6IkR4TjhLQzFyWXBRPSIsInZhbHVlIjoi...
+```
+
+The key belongs to the merchant, not to you. You never hold a key of your own, and you are never billed for what flows through your integration.
+
+## Getting a key
+
+Merchants generate their own key in their UniHop dashboard and paste it into your app's settings. There is nothing to request from us per merchant.
+
+You get your platform identifier at onboarding. Ask your account manager for it.
+
+Keys don't expire, but a merchant can regenerate theirs at any time, which invalidates the old one immediately.
+
+## Example
+
+<CodeGroup>
+
+```bash cURL
+curl https://backend.unihop.app/api/v1/your_platform/availability \
+  -H "Authorization: Bearer $MERCHANT_API_KEY"
+```
+
+```javascript Node.js
+const response = await fetch(
+  'https://backend.unihop.app/api/v1/your_platform/availability',
+  { headers: { Authorization: `Bearer ${process.env.MERCHANT_API_KEY}` } }
+);
+```
+
+```python Python
+import os
+import requests
+
+response = requests.get(
+    'https://backend.unihop.app/api/v1/your_platform/availability',
+    headers={'Authorization': f"Bearer {os.environ['MERCHANT_API_KEY']}"},
+)
+```
+
+```php PHP
+$response = Http::withToken($merchant->unihop_api_key)
+    ->get('https://backend.unihop.app/api/v1/your_platform/availability');
+```
+
+</CodeGroup>
+
+## When authentication fails
+
+Every failure is a `401` with a machine-readable `code`:
+
+| Code | What happened |
+| --- | --- |
+| `missing_token` | No `Authorization` header, or it isn't a bearer token |
+| `invalid_api_key` | The key is wrong, regenerated, or belongs to a closed account |
+
+```json
+{
+  "code": "invalid_api_key",
+  "message": "API key failed authentication."
+}
+```
+
+A bad key and an unknown platform identifier return the same code, so the URL space can't be enumerated.
+
+Retrying won't fix a `401`. Prompt the merchant to re-enter their key.
+
+## Rate limits
+
+Requests are counted per merchant key, so one busy merchant can't throttle the rest of your platform. Over the limit returns a `429` with a `Retry-After` header. Back off for that many seconds and retry.
+
+Planning a bulk import? Tell your account manager and we'll raise the ceiling for the window.
+
+## Merchant attribution
+
+The key already tells us which merchant an order belongs to, so you don't need to send anything else to identify them.
+
+Use `platform_payload` for your own correlation: your order ID, your internal store ID, whatever you route on. We store the object untouched and return it on every read and webhook.
