@@ -1,0 +1,1111 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "UniHop Platform API",
+    "description": "Book and track UniHop last-mile deliveries on behalf of the merchants on your platform. Your platform identifier lives in the URL; the merchant's own API key authenticates the request.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://backend.unihop.app/api/v1/{platform}",
+      "description": "Production",
+      "variables": {
+        "platform": {
+          "default": "your_platform",
+          "description": "The platform identifier UniHop issued you at onboarding."
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/deliveries": {
+      "post": {
+        "summary": "Create a delivery",
+        "description": "Creates a delivery and sends it to dispatch immediately. Every call creates a new delivery. There is no idempotency key.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The delivery was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryCreated"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The API key is missing, invalid, or not valid for this platform.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The body failed validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deliveries/{uid}": {
+      "get": {
+        "summary": "Get a delivery",
+        "description": "Returns the current state of one of your deliveries, including courier details once assigned.",
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "description": "The delivery `uid` returned when it was created.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The delivery.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Delivery"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The API key is missing, invalid, or not valid for this platform.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No delivery with that uid belongs to your platform.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deliveries/{uid}/cancel": {
+      "post": {
+        "summary": "Cancel a delivery",
+        "description": "Cancels a delivery that has not been picked up yet. `GET /deliveries/{uid}` returns `expected_cancellation_fee` beforehand.",
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "description": "The delivery `uid` returned when it was created.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The delivery was canceled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryCanceled"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The API key is missing, invalid, or not valid for this platform.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No delivery with that uid belongs to your platform.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The delivery has already been picked up and can no longer be canceled (`not_cancelable`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quote": {
+      "post": {
+        "summary": "Quote a delivery",
+        "description": "Prices a delivery without creating one. Takes the same body as `POST /deliveries`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The quote.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The API key is missing, invalid, or not valid for this platform.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The body failed validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/availability": {
+      "get": {
+        "summary": "Check availability",
+        "description": "A cheap liveness check you can poll before showing UniHop as a delivery option.",
+        "responses": {
+          "200": {
+            "description": "Current availability.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceAvailability"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The API key is missing, invalid, or not valid for this platform.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DeliveryRequest": {
+        "type": "object",
+        "properties": {
+          "pickup_address_street": {
+            "type": "string",
+            "description": "Street name of the pickup address."
+          },
+          "pickup_address_city": {
+            "type": "string",
+            "description": "City of the pickup address."
+          },
+          "pickup_address_country": {
+            "type": "string",
+            "description": "Country of the pickup address."
+          },
+          "pickup_address_number": {
+            "type": "string",
+            "description": "Street number of the pickup address."
+          },
+          "pickup_address_secondary_number": {
+            "type": "string",
+            "description": "Apartment or suite number for the pickup address."
+          },
+          "pickup_address_county": {
+            "type": "string",
+            "description": "County of the pickup address."
+          },
+          "pickup_address_state": {
+            "type": "string",
+            "description": "State of the pickup address."
+          },
+          "pickup_address_postal_code": {
+            "type": "string",
+            "description": "Postal or ZIP code of the pickup address."
+          },
+          "pickup_address_latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the pickup address."
+          },
+          "pickup_address_longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the pickup address."
+          },
+          "pickup_name": {
+            "type": "string",
+            "description": "Name of the contact person at the pickup location."
+          },
+          "pickup_phone_number": {
+            "type": "string",
+            "maxLength": 15,
+            "description": "Phone number of the pickup contact person."
+          },
+          "pickup_instructions": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Additional instructions for the pickup."
+          },
+          "dropoff_start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the dropoff window as an ISO 8601 UTC datetime with a trailing `Z` (YYYY-MM-DDTHH:MM:SSZ). Numeric offsets (e.g. +01:00) are not accepted. Required unless `package_delivery_mode` is `NOW`."
+          },
+          "pickup_start_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the pickup window as an ISO 8601 UTC datetime with a trailing `Z` (YYYY-MM-DDTHH:MM:SSZ). Numeric offsets (e.g. +01:00) are not accepted."
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Weight of the package in lbs."
+          },
+          "dimensions": {
+            "type": "object",
+            "properties": {
+              "length": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Length of the package in inches."
+              },
+              "width": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Width of the package in inches."
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Height of the package in inches."
+              }
+            },
+            "required": [
+              "length",
+              "width",
+              "height"
+            ],
+            "description": "Dimensions of the package."
+          },
+          "dropoff_address_street": {
+            "type": "string",
+            "description": "Street name of the dropoff address."
+          },
+          "dropoff_address_city": {
+            "type": "string",
+            "description": "City of the dropoff address."
+          },
+          "dropoff_address_country": {
+            "type": "string",
+            "description": "Country of the dropoff address."
+          },
+          "dropoff_address_number": {
+            "type": "string",
+            "description": "Street number of the dropoff address."
+          },
+          "dropoff_address_secondary_number": {
+            "type": "string",
+            "description": "Apartment or suite number for the dropoff address."
+          },
+          "dropoff_address_county": {
+            "type": "string",
+            "description": "County of the dropoff address."
+          },
+          "dropoff_address_state": {
+            "type": "string",
+            "description": "State of the dropoff address."
+          },
+          "dropoff_address_postal_code": {
+            "type": "string",
+            "description": "Postal or ZIP code of the dropoff address."
+          },
+          "dropoff_address_latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the dropoff address."
+          },
+          "dropoff_address_longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the dropoff address."
+          },
+          "dropoff_name": {
+            "type": "string",
+            "description": "Name of the contact person at the dropoff location."
+          },
+          "dropoff_phone_number": {
+            "type": "string",
+            "maxLength": 15,
+            "description": "Phone number of the dropoff contact person."
+          },
+          "dropoff_instructions": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Additional instructions for the dropoff."
+          },
+          "dropoff_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address of the dropoff contact person."
+          },
+          "package_minimum_vehicle_size": {
+            "type": "string",
+            "enum": [
+              "SEDAN",
+              "CAR",
+              "SUV",
+              "PICKUP_TRUCK",
+              "VAN",
+              "TRUCK",
+              "LARGE_VAN",
+              "EXTRA_LARGE_VAN",
+              "PICKUP"
+            ],
+            "description": "Minimum vehicle type required to transport the package."
+          },
+          "package_delivery_mode": {
+            "type": "string",
+            "enum": [
+              "NOW",
+              "SCHEDULED"
+            ],
+            "description": "Mode of delivery (NOW or SCHEDULED)."
+          },
+          "package_description": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Description of the package contents."
+          },
+          "package_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PHOTO_PROOF_OF_DELIVERY",
+                "SIGNATURE_PROOF_OF_DELIVERY",
+                "TWO_PERSON_TEAM"
+              ]
+            },
+            "description": "Special delivery or pickup requirements."
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer"
+                },
+                "external_id": {
+                  "type": "string"
+                },
+                "external_instance_id": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "barcode": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "quantity"
+              ]
+            },
+            "description": "List of items included in the delivery."
+          },
+          "items_count": {
+            "type": "integer",
+            "description": "Total count of items."
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email address for notifications."
+          },
+          "delivery_date": {
+            "type": "string",
+            "format": "date",
+            "description": "Delivery date (YYYY-MM-DD). Required unless `package_delivery_mode` is `NOW`. If a time component is included it is honoured; otherwise `dropoff_start_time` is used to determine the scheduled moment."
+          },
+          "package_value": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "description": "Monetary value of the package."
+          },
+          "tip": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "description": "Optional tip for the delivery."
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3,
+            "description": "The intended currency."
+          },
+          "delivery_style": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Standard",
+              "Special Handling"
+            ],
+            "description": "The delivery style. Can be Standard or Special Handling. Please contact us to unlock more delivery styles and associated features."
+          },
+          "platform_payload": {
+            "type": "object",
+            "description": "An arbitrary object of your own: order IDs, store IDs, anything you need to match this delivery back to your system. Stored untouched and returned on every read and webhook.",
+            "example": {
+              "store_id": "corner-bakery-cambridge",
+              "order_id": "10482"
+            }
+          }
+        },
+        "required": [
+          "pickup_address_street",
+          "pickup_address_city",
+          "pickup_address_country",
+          "pickup_name",
+          "dropoff_address_street",
+          "dropoff_address_city",
+          "dropoff_address_country",
+          "dropoff_name",
+          "email"
+        ],
+        "description": "A delivery to create. The same body is accepted by POST /quote."
+      },
+      "Delivery": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "The unique identifier for the order.",
+            "example": "job_123abc456def"
+          },
+          "status": {
+            "type": "string",
+            "description": "The current status of the order.",
+            "example": "DROPOFF_COMPLETE"
+          },
+          "price": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number",
+                "format": "float",
+                "description": "The cost of the order."
+              },
+              "currency": {
+                "type": "string",
+                "description": "The currency of the price.",
+                "example": "USD"
+              }
+            }
+          },
+          "distance": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "number",
+                "format": "float"
+              },
+              "unit": {
+                "type": "string"
+              }
+            }
+          },
+          "pickup_name": {
+            "type": "string",
+            "description": "The full name of the contact person at the pickup location."
+          },
+          "dropoff_name": {
+            "type": "string",
+            "description": "The full name of the contact person at the dropoff location."
+          },
+          "delivery_date": {
+            "type": "string",
+            "description": "The scheduled delivery date, as a full ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
+          },
+          "driver_id": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Reserved. Always null. Identify a courier by `driver_name`."
+          },
+          "driver_name": {
+            "type": "string",
+            "description": "The full name of the assigned courier."
+          },
+          "driver_location": {
+            "type": "object",
+            "description": "The last known GPS coordinates of the driver.",
+            "properties": {
+              "lat": {
+                "type": "number",
+                "description": "The latitude of the driver's location."
+              },
+              "lng": {
+                "type": "number",
+                "description": "The longitude of the driver's location."
+              }
+            }
+          },
+          "driver_dropoff_phone_number": {
+            "type": "string",
+            "description": "The driver's phone number for dropoff-related communication."
+          },
+          "driver_pickup_phone_number": {
+            "type": "string",
+            "description": "The driver's phone number for pickup-related communication."
+          },
+          "driver_vehicle_make": {
+            "type": "string",
+            "description": "The make of the driver's vehicle (e.g., `Tesla`)."
+          },
+          "driver_vehicle_model": {
+            "type": "string",
+            "description": "The model of the driver's vehicle (e.g., `Model Z`)."
+          },
+          "driver_vehicle_year": {
+            "type": "number",
+            "description": "The manufacturing year of the driver's vehicle."
+          },
+          "dropoff_time_estimated": {
+            "type": "string",
+            "description": "The estimated time of arrival at the dropoff location, in a standard datetime format."
+          },
+          "pickup_address_street": {
+            "type": "string",
+            "description": "Street name of the pickup address."
+          },
+          "pickup_address_city": {
+            "type": "string",
+            "description": "City of the pickup address."
+          },
+          "pickup_address_country": {
+            "type": "string",
+            "description": "Country of the pickup address."
+          },
+          "pickup_address_number": {
+            "type": "string",
+            "description": "Street number of the pickup address."
+          },
+          "pickup_address_secondary_number": {
+            "type": "string",
+            "description": "Secondary treet number of the pickup address."
+          },
+          "pickup_address_county": {
+            "type": "string",
+            "description": "County of the pickup address."
+          },
+          "pickup_address_state": {
+            "type": "string",
+            "description": "State of the pickup address."
+          },
+          "pickup_address_postal_code": {
+            "type": "string",
+            "description": "Postal or ZIP code of the pickup address."
+          },
+          "pickup_address_latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the pickup address."
+          },
+          "pickup_address_longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the pickup address."
+          },
+          "pickup_phone_number": {
+            "type": "string",
+            "description": "The contact phone number for the pickup location."
+          },
+          "pickup_instructions": {
+            "type": "string",
+            "description": "Special instructions for the courier at the pickup location."
+          },
+          "email": {
+            "type": "string",
+            "description": "The email address of the contact person at the pickup location."
+          },
+          "dropoff_address_street": {
+            "type": "string",
+            "description": "Street name of the dropoff address."
+          },
+          "dropoff_address_city": {
+            "type": "string",
+            "description": "City of the dropoff address."
+          },
+          "dropoff_address_country": {
+            "type": "string",
+            "description": "Country of the dropoff address."
+          },
+          "dropoff_address_number": {
+            "type": "string",
+            "description": "Street number of the dropoff address."
+          },
+          "dropoff_address_secondary_number": {
+            "type": "string",
+            "description": "Apartment or suite number for the dropoff address."
+          },
+          "dropoff_address_county": {
+            "type": "string",
+            "description": "County of the dropoff address."
+          },
+          "dropoff_address_state": {
+            "type": "string",
+            "description": "State of the dropoff address."
+          },
+          "dropoff_address_postal_code": {
+            "type": "string",
+            "description": "Postal or ZIP code of the dropoff address."
+          },
+          "dropoff_address_latitude": {
+            "type": "number",
+            "description": "Latitude coordinate of the dropoff address."
+          },
+          "dropoff_address_longitude": {
+            "type": "number",
+            "description": "Longitude coordinate of the dropoff address."
+          },
+          "dropoff_phone_number": {
+            "type": "string",
+            "description": "The contact phone number for the dropoff location."
+          },
+          "dropoff_instructions": {
+            "type": "string",
+            "description": "Special instructions for the courier at the dropoff location."
+          },
+          "dropoff_email": {
+            "type": "string",
+            "description": "The email of the entity to contact."
+          },
+          "package_description": {
+            "type": "string",
+            "description": "A description of the contents of the package being delivered."
+          },
+          "package_minimum_vehicle_size": {
+            "type": "string",
+            "description": "The minimum vehicle size required for this delivery (e.g., `CAR`, `BIKE`)."
+          },
+          "package_delivery_mode": {
+            "type": "string",
+            "description": "The delivery mode, indicating if it's on-demand (`NOW`) or scheduled."
+          },
+          "package_requirements": {
+            "type": "array",
+            "description": "A list of special requirements for the delivery (e.g., `photo_proof_of_delivery`).",
+            "items": {
+              "type": "string"
+            }
+          },
+          "items_count": {
+            "type": "number",
+            "description": "The number of items in the package."
+          },
+          "items": {
+            "type": "array",
+            "description": "A list of objects, each detailing an item in the package. Can be null.",
+            "items": {
+              "type": "object"
+            }
+          },
+          "weight": {
+            "type": "number",
+            "description": "The weight of the package."
+          },
+          "package_value": {
+            "type": "number",
+            "format": "float",
+            "description": "The declared value of the package, converted from cents."
+          },
+          "pickup_start_time": {
+            "type": "string",
+            "description": "The start of the pickup window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
+          },
+          "dropoff_start_time": {
+            "type": "string",
+            "description": "The start of the dropoff window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
+          },
+          "delivery_end_time": {
+            "type": "string",
+            "description": "The end of the dropoff window, as an ISO 8601 UTC datetime (`YYYY-MM-DDTHH:MM:SS+00:00`)."
+          },
+          "dropoff_verification_image_url": {
+            "type": "string",
+            "description": "URL to a photo taken as proof of delivery. Available on relevant events."
+          },
+          "dropoff_signature_image_url": {
+            "type": "string",
+            "description": "URL to a signature captured as proof of delivery. Available on relevant events."
+          },
+          "cancellation_reason": {
+            "type": "string",
+            "description": "The reason for a delivery cancellation. Available on cancellation events."
+          },
+          "tip": {
+            "type": "number",
+            "format": "float",
+            "description": "The tip amount for the driver, converted from cents."
+          },
+          "delivery_style": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "Standard",
+              "Special Handling"
+            ],
+            "description": "The delivery style. Can be Standard or Special Handling. Please contact us to unlock more delivery styles and associated features."
+          },
+          "platform_payload": {
+            "type": "object",
+            "description": "An arbitrary object of your own: order IDs, store IDs, anything you need to match this delivery back to your system. Stored untouched and returned on every read and webhook.",
+            "example": {
+              "store_id": "corner-bakery-cambridge",
+              "order_id": "10482"
+            }
+          },
+          "dimensions": {
+            "type": "object",
+            "description": "The dimentions of the package.",
+            "properties": {
+              "height": {
+                "type": "number",
+                "description": "The height of the package."
+              },
+              "length": {
+                "type": "number",
+                "description": "The length of the package."
+              },
+              "width": {
+                "type": "number",
+                "description": "The width of the package."
+              }
+            }
+          },
+          "tracking_link": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URL to track the delivery in real time.",
+            "example": "https://app.unihop.app/tracking/9f8e7d6c-1b2a-4c3d-8e9f-0a1b2c3d4e5f"
+          },
+          "expected_cancellation_fee": {
+            "type": "object",
+            "description": "The expected cancellation fee for the order.",
+            "properties": {
+              "amount": {
+                "type": "string",
+                "description": "The cancellation fee amount.",
+                "example": "0.00"
+              },
+              "currency": {
+                "type": "string",
+                "description": "The currency of the cancellation fee."
+              }
+            }
+          }
+        },
+        "description": "A delivery as returned by the GET endpoints."
+      },
+      "DeliveryCreated": {
+        "type": "object",
+        "description": "Returned when a delivery has been created and sent to dispatch.",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Order created successfully."
+          },
+          "uid": {
+            "type": "string",
+            "description": "UniHop's identifier for the delivery. Use it on every follow-up call.",
+            "example": "9f8e7d6c-1b2a-4c3d-8e9f-0a1b2c3d4e5f"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "example": "Created"
+              },
+              "tracking_link": {
+                "type": "string",
+                "format": "uri",
+                "description": "A public tracking page you can hand to the recipient.",
+                "example": "https://app.unihop.app/tracking/9f8e7d6c-1b2a-4c3d-8e9f-0a1b2c3d4e5f"
+              }
+            },
+            "required": [
+              "status",
+              "tracking_link"
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "uid",
+          "data"
+        ]
+      },
+      "DeliveryCanceled": {
+        "type": "object",
+        "description": "Returned when a delivery has been canceled.",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Delivery canceled successfully."
+          },
+          "uid": {
+            "type": "string",
+            "example": "9f8e7d6c-1b2a-4c3d-8e9f-0a1b2c3d4e5f"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "example": "Canceled"
+              },
+              "cancellation_fee": {
+                "$ref": "#/components/schemas/CancellationFee"
+              }
+            },
+            "required": [
+              "status",
+              "cancellation_fee"
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "uid",
+          "data"
+        ]
+      },
+      "CancellationFee": {
+        "type": "object",
+        "description": "What canceling costs. Free before the cutoff. After it, the fee scales with vehicle size.",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "description": "Decimal string.",
+            "example": "0.00"
+          },
+          "currency": {
+            "type": "string",
+            "example": "USD"
+          }
+        },
+        "required": [
+          "amount",
+          "currency"
+        ]
+      },
+      "QuoteResponse": {
+        "type": "object",
+        "description": "Successful response returned for a delivery quote.",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Quote created successfully"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "price": {
+                "type": "object",
+                "properties": {
+                  "delivery_fee": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The estimated delivery fee.",
+                    "example": 12.5
+                  },
+                  "tip": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "The tip amount.",
+                    "example": 23
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "The currency of the delivery fee.",
+                    "example": "USD"
+                  }
+                },
+                "required": [
+                  "delivery_fee",
+                  "tip",
+                  "currency"
+                ]
+              },
+              "distance": {
+                "type": "number",
+                "format": "float",
+                "description": "The delivery distance in miles.",
+                "example": 0.61
+              }
+            },
+            "required": [
+              "price",
+              "distance"
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "data"
+        ]
+      },
+      "ServiceAvailability": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string",
+            "description": "Name of the service provider",
+            "example": "UniHop"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Whether the service is currently available",
+            "example": true
+          }
+        },
+        "required": [
+          "service",
+          "available"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Machine-readable error code, e.g. `not_found`, `not_cancelable`, `invalid_api_key`."
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable description of what went wrong."
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "ValidationError": {
+        "type": "object",
+        "description": "Returned when the body fails validation.",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "The dropoff name field is required."
+          },
+          "errors": {
+            "type": "object",
+            "description": "Field name to a list of messages.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "The merchant's UniHop API key, sent as `Authorization: Bearer <key>`. It identifies the merchant and is what their deliveries are billed against."
+      }
+    }
+  }
+}

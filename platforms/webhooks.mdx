@@ -1,0 +1,208 @@
+---
+title: 'Webhooks'
+description: 'Status changes and courier movement, pushed to your endpoint'
+---
+
+## Turning them on
+
+Give your account manager an HTTPS URL during onboarding and we'll push events to it. No URL on file means no webhooks. Poll [`GET /deliveries/{uid}`](/platforms/api-reference/endpoint/get-delivery) instead for the same state.
+
+One URL per platform. Fan out to individual merchants on your side using `uid` or `platform_payload`. Both are on every event.
+
+## What we send
+
+`POST` to your URL, `Content-Type: application/json`, with a JWT in the `Authorization` header. We expect a `2xx`. Anything else, or a timeout, and we retry up to five times with a growing gap between attempts.
+
+Webhooks can arrive more than once, and status events can arrive out of order when a courier's updates bunch up. Key on `uid` and treat handling as idempotent.
+
+## Event types
+
+**Delivery events** cover the lifecycle of the delivery itself:
+
+| Event | Meaning |
+| --- | --- |
+| `delivery.created` | We accepted the delivery and started sourcing a driver |
+| `delivery.assigned` | A driver has taken it |
+| `delivery.pickup_enroute` | The driver is on the way to the pickup |
+| `delivery.pickup_arrived` | The driver is at the pickup |
+| `delivery.pickup_complete` | The package is in the vehicle |
+| `delivery.dropoff_enroute` | The driver is on the way to the recipient |
+| `delivery.dropoff_arrived` | The driver is at the dropoff. Proof of delivery arrives on this event. |
+| `delivery.dropoff_complete` | Delivered |
+| `delivery.return_in_progress` | The package is going back to the pickup |
+| `delivery.returned` | The package is back at the pickup |
+| `delivery.canceled` | Canceled by you, by us, or by the provider. See `cancellation_reason`. |
+| `delivery.failed` | The delivery could not be completed |
+
+**Location events** are the same milestones carrying fresh courier coordinates. Use these to move a pin on a map, and the delivery events to drive state.
+
+`location.assigned_driver`, `location.pickup_enroute`, `location.pickup_arrived`, `location.pickup_complete`, `location.dropoff_enroute`, `location.dropoff_arrived`, `location.return_in_progress`
+
+## Body
+
+```json
+{
+  "uid": "9f8e7d6c-1b2a-4c3d-8e9f-0a1b2c3d4e5f",
+  "event_name": "delivery.pickup_complete",
+  "status": "Picked Up",
+  "platform_payload": { "store_id": "corner-bakery-cambridge", "order_id": "10482" },
+  "price": { "value": 14.25, "currency": "USD" },
+  "distance": { "value": 2.4, "unit": "miles" },
+  "tip": 3.0,
+  "pickup_name": "Corner Bakery",
+  "pickup_phone_number": "+16175550142",
+  "pickup_instructions": "Counter pickup, ask for the online order shelf",
+  "email": "orders@cornerbakery.example",
+  "pickup_address": {
+    "street": "Massachusetts Ave",
+    "number": "1740",
+    "city": "Cambridge",
+    "county": "Middlesex",
+    "state": "MA",
+    "postal_code": "02138",
+    "country": "US",
+    "latitude": 42.3875,
+    "longitude": -71.1191
+  },
+  "dropoff_name": "Dana Whitfield",
+  "dropoff_phone_number": "+16175550188",
+  "dropoff_instructions": "Blue door, leave with the front desk",
+  "dropoff_address": {
+    "street": "Broadway",
+    "number": "355",
+    "city": "Somerville",
+    "county": "Middlesex",
+    "state": "MA",
+    "postal_code": "02145",
+    "country": "US",
+    "latitude": 42.3812,
+    "longitude": -71.0964
+  },
+  "driver_id": 82854783,
+  "driver_name": "Marcus Bell",
+  "driver_location": { "lat": 42.3841, "lng": -71.1077 },
+  "driver_pickup_phone_number": "+16175550110",
+  "driver_dropoff_phone_number": "+16175550110",
+  "driver_vehicle_make": "Toyota",
+  "driver_vehicle_model": "Prius",
+  "driver_vehicle_year": 2021,
+  "dropoff_time_estimated": "2026-08-20T18:22:00+00:00",
+  "delivery_date": "2026-08-20",
+  "pickup_start_time": "2026-08-20T17:30:00+00:00",
+  "dropoff_start_time": "2026-08-20T18:00:00+00:00",
+  "delivery_start_time": "2026-08-20T17:30:00+00:00",
+  "delivery_end_time": "2026-08-20T18:30:00+00:00",
+  "package_description": "Two boxed cakes",
+  "package_minimum_vehicle_size": "SEDAN",
+  "package_delivery_mode": "scheduled",
+  "package_requirements": ["photo_proof_of_delivery"],
+  "package_value": 68.0,
+  "items_count": 2,
+  "items": [],
+  "weight": 4.5
+}
+```
+
+### Notes on individual fields
+
+| Field | Worth knowing |
+| --- | --- |
+| `uid` | The identifier `POST /deliveries` returned. The only key tying an event back to your order, so store it at creation. |
+| `platform_payload` | Whatever object you sent at creation, returned untouched. Put your own order and store IDs here. |
+| `status` | Human-readable delivery status, e.g. `Picked Up`. `event_name` is the machine-readable one; branch on that. |
+| `pickup_address` / `dropoff_address` | Nested objects, not flattened fields. Omitted entirely when we have nothing to put in them. |
+| `driver_location` | Present on `location.*` events and on delivery events once a driver is assigned. |
+| `price.value` | Decimal, converted from cents. `null` until pricing settles. |
+| `dropoff_verification_image_url` | Photo proof. Only on `delivery.dropoff_arrived`. |
+| `dropoff_signature_image_url` | Signature proof, when the delivery required one. Only on `delivery.dropoff_arrived`. |
+| `cancellation_reason` | Only on `delivery.canceled`. |
+| Datetimes | ISO 8601 UTC (`YYYY-MM-DDTHH:MM:SS+00:00`). `delivery_date` is a plain `YYYY-MM-DD`. |
+
+Fields we have no value for are sent as `null` or omitted. Treat both the same way.
+
+## Verifying the request
+
+Each webhook carries a JWT signed with our RSA private key. Verify it with our public key before you trust the body. Your account manager provides `unihop_public_key.pem`.
+
+```
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+The token decodes to:
+
+```json
+{
+  "iss": "unihop",
+  "exp": 1786291200,
+  "payload": { }
+}
+```
+
+`payload` holds the body documented above. Check that `iss` is `unihop`, that the signature verifies under `RS256`, and that `exp` hasn't passed.
+
+<CodeGroup>
+
+```php PHP
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+$token = substr($request->header('Authorization'), 7);
+
+$decoded = JWT::decode($token, new Key(file_get_contents('unihop_public_key.pem'), 'RS256'));
+
+abort_unless($decoded->iss === 'unihop', 401);
+
+$event = $decoded->payload;
+```
+
+```javascript Node.js
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+
+const publicKey = fs.readFileSync('unihop_public_key.pem');
+
+app.post('/unihop/webhook', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+
+  try {
+    const decoded = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
+
+    if (decoded.iss !== 'unihop') throw new Error('Unexpected issuer');
+
+    handleEvent(decoded.payload);
+
+    return res.sendStatus(200);
+  } catch (error) {
+    return res.status(401).json({ error: error.message });
+  }
+});
+```
+
+```python Python
+import jwt
+
+with open('unihop_public_key.pem', 'rb') as key_file:
+    public_key = key_file.read()
+
+@app.route('/unihop/webhook', methods=['POST'])
+def unihop_webhook():
+    token = request.headers.get('Authorization', '').removeprefix('Bearer ')
+
+    try:
+        decoded = jwt.decode(token, public_key, algorithms=['RS256'])
+    except jwt.PyJWTError as error:
+        return jsonify({'error': str(error)}), 401
+
+    if decoded.get('iss') != 'unihop':
+        return jsonify({'error': 'Unexpected issuer'}), 401
+
+    handle_event(decoded['payload'])
+
+    return '', 200
+```
+
+</CodeGroup>
+
+## Responding
+
+Return a `2xx` as soon as you've stored the event, then do the real work asynchronously. We treat a slow endpoint as a failed one.

@@ -1,4 +1,7 @@
-# Authentication Guide (RS256)
+---
+title: 'Authentication'
+description: 'Sign your requests with an RS256 JWT'
+---
 
 To authenticate with our API, you'll need to generate a **public/private RSA key pair**. We use **RS256** (RSA Signature with SHA-256) to sign and verify requests securely.
 
@@ -51,7 +54,7 @@ For our API, your JWT **must** include the following claims in the payload:
 | `iss` | Issuer - Your partner_uid (provided by us) | Yes | `"iss": "your_partner_uid"` |
 | `iat` | Issued At - Current timestamp (seconds since epoch) | Yes | `"iat": 1686104400` |
 | `exp` | Expiration Time - Must be within 30 minutes of `iat` | Yes | `"exp": 1686106200` |
-| `merchant_id` | Merchant identifier - Allows a partner to route requests to a specific merchant. Useful when integrating multiple merchants under a single partner account. | No | `"merchant_id": "merchant_abc123"` |
+| `merchant_id` | Merchant identifier - Allows a partner to route requests to a specific merchant. Useful when integrating multiple merchants under a single account. | No | `"merchant_id": "merchant_abc123"` |
 
 ### Code Examples
 
@@ -149,7 +152,7 @@ print(f"Bearer {token}")
    - The presence of required claims (`iss`, `iat`, `exp`)
    - That the token hasn't expired
    - That the expiration is within 30 minutes of issuance
-   - If `merchant_id` is provided, that it corresponds to a valid merchant under your partner account
+   - If `merchant_id` is provided, that it corresponds to a valid merchant under your account
 
 ## 3. 🔑 Share Your Public Key
 
@@ -157,7 +160,7 @@ After generating your key pair, you need to share your public key with us. This 
 
 1. Contact your account manager or support team
 2. Send them your `public_key.pem` file
-3. We'll associate it with your partner account
+3. We'll associate it with your account
 
 Once your public key is registered in our system, you can start using JWT authentication for your API requests.
 
@@ -378,6 +381,6 @@ If you're experiencing authentication issues, check:
 - You're using the correct private key to sign the token
 - We have your correct public key on file
 - The Authorization header format is correct (`Bearer <token>`)
-- If using `merchant_id`, verify the ID matches a merchant registered under your partner account
+- If using `merchant_id`, verify the ID matches a merchant registered under your account
 
 For further assistance, contact our support team.

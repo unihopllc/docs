@@ -1,0 +1,99 @@
+---
+title: 'Platform API'
+description: 'Book and track UniHop deliveries for the merchants on your platform'
+---
+
+## Who this is for
+
+Software that other businesses install and book through: a checkout delivery scheduling app, an order management system, a shipping layer in a storefront.
+
+Each merchant brings their own UniHop API key. They generate it in their UniHop dashboard and paste it into your app's settings. You send that key on their deliveries, and their deliveries are billed to their own account. You are never in the billing path.
+
+<Note>
+  Booking deliveries for your own business, or running a marketplace where the orders are yours? Use the [Direct API](/direct/index) instead.
+</Note>
+
+## Base URL
+
+Your platform identifier sits in the path:
+
+```
+https://backend.unihop.app/api/v1/{platform}
+```
+
+We issue the identifier at onboarding. It replaces `{platform}` in every call:
+
+```
+https://backend.unihop.app/api/v1/your_platform/deliveries
+```
+
+## Your first delivery
+
+```bash
+curl -X POST https://backend.unihop.app/api/v1/your_platform/quote \
+  -H "Authorization: Bearer $MERCHANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pickup_name": "Corner Bakery",
+    "pickup_address_street": "Massachusetts Ave",
+    "pickup_address_number": "1740",
+    "pickup_address_city": "Cambridge",
+    "pickup_address_state": "MA",
+    "pickup_address_postal_code": "02138",
+    "pickup_address_country": "US",
+    "dropoff_name": "Dana Whitfield",
+    "dropoff_address_street": "Broadway",
+    "dropoff_address_number": "355",
+    "dropoff_address_city": "Somerville",
+    "dropoff_address_state": "MA",
+    "dropoff_address_postal_code": "02145",
+    "dropoff_address_country": "US",
+    "email": "orders@cornerbakery.example",
+    "delivery_date": "2026-08-20",
+    "dropoff_start_time": "2026-08-20T18:00:00Z",
+    "currency": "USD"
+  }'
+```
+
+The same body works on `POST /deliveries`, so you can quote at checkout and book afterwards without rebuilding the request.
+
+Store the `uid` from the create response. Reads, cancellations and webhooks are all keyed on it. Your own order and store IDs go in `platform_payload`, which we return on every read and webhook.
+
+## The five endpoints
+
+| | |
+| --- | --- |
+| [Quote a delivery](/platforms/api-reference/endpoint/quote) | Price and distance, nothing created |
+| [Create a delivery](/platforms/api-reference/endpoint/create-delivery) | Book it and send it to dispatch |
+| [Get a delivery](/platforms/api-reference/endpoint/get-delivery) | Status, courier, ETA, proof of delivery |
+| [Cancel a delivery](/platforms/api-reference/endpoint/cancel-delivery) | Before pickup, with the fee stated up front |
+| [Check availability](/platforms/api-reference/endpoint/availability) | A liveness check for your storefront |
+
+## Delivery styles
+
+The style drives which vehicles and handling rules apply. Omit `delivery_style` and you get **Standard**.
+
+| Style | Use it for |
+| --- | --- |
+| `Standard` | Everyday parcels and orders one person can carry |
+| `Hybrid` | Routes that mix a scheduled window with on-demand sourcing |
+| `Special Handling` | Fragile, temperature-sensitive, or high-value goods |
+| `Oversize` | Anything needing an SUV or larger. Set `package_minimum_vehicle_size` to match, or the request is rejected. |
+
+Additional styles can be enabled for your platform during onboarding.
+
+## Times and time zones
+
+Every datetime, in and out, is ISO 8601 UTC: `2026-08-20T18:00:00Z`. We don't infer local time from an address.
+
+Set `package_delivery_mode` to `NOW` for on-demand. Leave it out (or send `SCHEDULED`) and both `delivery_date` and `dropoff_start_time` are required.
+
+## Tracking and updates
+
+Every created delivery returns a `tracking_link`, a public page you can give the recipient with no login.
+
+For programmatic updates, give us a webhook URL at onboarding. See [Webhooks](/platforms/webhooks).
+
+## Need a hand?
+
+Your account manager handles platform identifiers, styles, and coverage. API questions: [help.unihop.app](https://help.unihop.app).
