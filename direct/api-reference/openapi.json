@@ -68,42 +68,6 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/OrderRequest"
-              },
-              "examples": {
-                "gift": {
-                  "summary": "A gift delivery",
-                  "value": {
-                    "pickup_name": "Petal Florist",
-                    "pickup_phone_number": "+16175550100",
-                    "pickup_address_street": "Massachusetts Ave",
-                    "pickup_address_number": "1740",
-                    "pickup_address_city": "Cambridge",
-                    "pickup_address_state": "MA",
-                    "pickup_address_postal_code": "02138",
-                    "pickup_address_country": "US",
-                    "pickup_address_latitude": 42.383,
-                    "pickup_address_longitude": -71.1196,
-                    "dropoff_name": "Dana Whitfield",
-                    "dropoff_phone_number": "+16175550123",
-                    "dropoff_address_street": "Broadway",
-                    "dropoff_address_number": "355",
-                    "dropoff_address_city": "Somerville",
-                    "dropoff_address_state": "MA",
-                    "dropoff_address_postal_code": "02145",
-                    "dropoff_address_country": "US",
-                    "dropoff_address_latitude": 42.3935,
-                    "dropoff_address_longitude": -71.092,
-                    "email": "orders@petalflorist.example",
-                    "package_delivery_mode": "NOW",
-                    "currency": "USD",
-                    "package_requirements": ["GIFT_DELIVERY"],
-                    "gift_sender": {
-                      "name": "Ana Lopez",
-                      "phone": "+16175550188",
-                      "email": "ana@lopez.example"
-                    }
-                  }
-                }
               }
             }
           }
@@ -864,7 +828,7 @@
               "type": "string",
               "enum": ["PHOTO_PROOF_OF_DELIVERY", "SIGNATURE_PROOF_OF_DELIVERY", "TWO_PERSON_TEAM", "GIFT_DELIVERY"]
             },
-            "description": "Special delivery or pickup requirements. `GIFT_DELIVERY` marks the delivery as a gift: the dropoff contact is not texted before it arrives, only once it is delivered, and the driver can still call them."
+            "description": "Special delivery or pickup requirements. `GIFT_DELIVERY` marks the delivery as a gift: the dropoff contact is not texted before it arrives, only once it is delivered, and the driver can still call them. With it, you can also send `gift_sender`."
           },
           "items": {
             "type": "array",
@@ -945,22 +909,19 @@
             "properties": {
               "name": {
                 "type": "string",
-                "maxLength": 80,
                 "description": "The sender's name."
               },
               "phone": {
                 "type": "string",
-                "maxLength": 50,
                 "description": "The sender's phone number: a US or Canadian number in any common format, or an international number starting with `+`. Stored in E.164 (e.g. `+16175550188`). A number we cannot read is refused with a 422 on `gift_sender.phone`: \"The gift sender.phone must be a valid phone number.\""
               },
               "email": {
                 "type": "string",
                 "format": "email",
-                "maxLength": 120,
                 "description": "The sender's email address."
               }
             },
-            "description": "Who sent the gift. Only allowed with the `GIFT_DELIVERY` package requirement, and needs a `phone` or an `email`. Otherwise the request is refused with a 422 on `gift_sender`: \"A gift sender needs the GIFT_DELIVERY package requirement.\" or \"Add a phone number or email for the gift sender.\""
+            "description": "Who sent the gift. Optional, and only accepted when `package_requirements` includes `GIFT_DELIVERY`. Needs a `phone` or an `email`. Otherwise the request is refused with a 422 on `gift_sender`: \"A gift sender needs the GIFT_DELIVERY package requirement.\" or \"Add a phone number or email for the gift sender.\""
           }
         },
         "required": [
